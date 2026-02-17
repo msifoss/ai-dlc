@@ -49,6 +49,39 @@ Start by answering these questions. Write the answers in a project brief documen
 
 **Capture these answers in your context file.** They orient the AI for every subsequent session.
 
+#### Structured IDEA Artifact
+
+For complex projects, formalize the intent as a structured IDEA artifact. This format ensures no critical context is lost between the initial conversation and subsequent phases.
+
+```markdown
+# IDEA: [Project or Feature Name]
+
+## Problem Statement
+[1-2 sentences: What problem does this solve? Who has this problem?]
+
+## Business Context
+[Why now? What is the cost of not solving this? Market pressure, user demand, regulatory requirement?]
+
+## Success Metrics
+[How do we measure success? Revenue impact, time saved, error reduction, user satisfaction?]
+
+## Constraints
+[Budget, timeline, regulatory, technology, team limitations]
+
+## Risk Tier Assessment
+- **Risk Tier:** [1 (Critical) | 2 (Significant) | 3 (Normal)]
+- **Rationale:** [Why this tier? See Autonomous Execution Guide for tier definitions]
+- **Gate ceremony impact:** [What level of review ceremony does this risk tier require?]
+```
+
+The risk tier assessment determines how much ceremony surrounds human decision gates for this feature. See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for trust-adaptive gates and risk tier definitions.
+
+| Risk Tier | Examples | Gate Ceremony |
+|-----------|---------|---------------|
+| **Tier 1: Critical** | Auth, payments, PII, cryptography | Full ceremony on every gate — no shortcuts |
+| **Tier 2: Significant** | API contracts, data model, infrastructure | Standard ceremony — review at every phase transition |
+| **Tier 3: Normal** | Feature implementation, UI, configuration | Ceremony scales with [trust level](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) |
+
 #### DEFINE: Write Requirements and ADRs
 
 Transform the intent into numbered requirements (Activity 2) and architecture decisions (Activity 3). These are the core deliverables of Phase 1.
@@ -528,6 +561,7 @@ Phase 1 contains three human decision gates.
 |----------|-------------------|
 | [REQUIREMENTS.md](../../templates/REQUIREMENTS.md) | Write all project requirements with REQ-NNN IDs |
 | [SECURITY.md](../../templates/SECURITY.md) | Document initial security policy and five-persona review findings |
+| [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) | Risk tier assessment and trust-adaptive gate ceremony |
 
 ADRs do not have a dedicated template — use the format described in Activity 3. Store them as individual files in `docs/architecture/ADR-NNN-title.md`.
 
@@ -586,6 +620,7 @@ ADRs do not have a dedicated template — use the format described in Activity 3
 | Not updating the context file | AI assistant in Phase 2+ lacks knowledge of Phase 1 decisions | Update CLAUDE.md after every major decision |
 | Treating all requirements as "Must Have" | Everything is priority 1, so nothing is | Limit "Must Have" to requirements that define the MVP; be honest about "Should Have" and "Nice to Have" |
 | Writing ADRs without alternatives | Decisions appear arbitrary; no basis for revisiting | Always document at least 2 alternatives with genuine pros/cons |
+| Not assessing risk tier | Wrong level of ceremony applied; critical features under-reviewed or trivial features over-reviewed | Assign a risk tier during the IDENTIFY step; let it drive gate ceremony |
 
 ---
 

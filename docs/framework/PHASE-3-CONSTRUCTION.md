@@ -473,6 +473,74 @@ test_error
 test_function_works
 ```
 
+### 10. Multi-Agent Execution Model
+
+Complex construction work benefits from specialized AI agents. Match the agent's specialization to the task for higher quality and efficiency.
+
+#### Agent Taxonomy for Construction
+
+| Agent Type | Specialization | When to Use |
+|------------|---------------|-------------|
+| **Builder** | Code implementation and test writing | Default for most bolt work |
+| **Reviewer** | Five-persona review, code analysis | Post-bolt review, security-sensitive changes |
+| **Scout** | Research, debugging, dependency analysis | Blocker investigation, library evaluation |
+| **Scribe** | Documentation, captain's logs | Retro step, runbook generation |
+
+#### Smart Model Routing
+
+Not every construction task requires the same model capability. Route tasks to the appropriate tier:
+
+| Tier | Task Examples | Routing Guidance |
+|------|---------------|-----------------|
+| **Lightweight** | Boilerplate, formatting, simple refactoring, log writing | Fastest model; minimize cost and latency |
+| **Standard** | Feature implementation, test writing, standard code review | Default for most construction work |
+| **Complex** | Security-sensitive code, complex debugging, architecture-impacting changes | Most capable model; correctness over speed |
+
+#### Mandatory Delegation Rules
+
+Delegate to a specialist agent when:
+
+- The task requires a **different skill profile** (e.g., security review during construction)
+- The task would benefit from a **fresh context window** (long sessions degrade quality)
+- The task is **independent** and can run in parallel with current work
+- A **dedicated review** is needed (reviewer agent for security-sensitive changes)
+
+Handle directly when the task is within the current agent's specialization and requires loaded context.
+
+See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for the complete agent taxonomy and delegation framework.
+
+### 11. The Ascent as Construction Discipline
+
+The Ascent is the persistence loop that ensures every bolt is verified complete before proceeding. It replaces the common "generate and declare done" pattern with a verification cycle.
+
+```
+IMPLEMENT → VERIFY → CHECK CRITERIA → All met? → YES → COMPLETE
+                                         │
+                                         NO → Fix and return to IMPLEMENT
+```
+
+#### Ascent Rules During Construction
+
+1. **Never declare a bolt complete without running the full test suite.** Not just the new tests — all tests.
+2. **Check every acceptance criterion explicitly.** Do not assume passing tests imply all criteria are met.
+3. **Verify no regressions.** Adjacent components may break when new code is added.
+4. **Exit only on verified completion, blocker escalation, or time-box split.** "Mostly works" is not an exit condition.
+
+See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for the complete Ascent pattern.
+
+### 12. Trust-Adaptive Review
+
+Review ceremony scales with earned trust and risk tier. New projects start with full ceremony; mature projects with strong track records earn reduced ceremony for normal-risk work.
+
+| Trust Level | Review Ceremony | Applies When |
+|-------------|----------------|-------------|
+| Level 0 (New) | Every diff reviewed in detail | First 5 bolts of a new project or team |
+| Level 1 (Established) | Review at phase transitions + major decisions | 5+ bolts with consistent quality |
+| Level 2 (Trusted) | Review at phase transitions, spot-check construction | 20+ bolts with minimal rework |
+| Level 3 (Autonomous) | Review at human decision gates only | Extended track record, mature context |
+
+**Risk tier override:** Security-critical work (Tier 1) always receives full ceremony regardless of trust level. See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for trust level definitions and risk tier overrides.
+
 ---
 
 ## Deliverables
@@ -616,6 +684,19 @@ See [Cost Awareness Pillar](../pillars/PILLAR-COST.md) for full guidance.
 
 **Advancing to Phase 4:** Construction completion means "all features built and tested." It does not mean "production ready." Phase 4 (Hardening) addresses security audits, operational readiness, performance tuning, and cost controls. Do not skip Hardening just because the code works.
 
+### Execution Mode Selection
+
+Select the execution mode that matches the current work:
+
+| Mode | When to Use | Gate Frequency |
+|------|-------------|---------------|
+| **The Ascent** | Most bolt work — single focused task | Per-bolt verification |
+| **Orchestrated** | Complex bolts requiring multiple specializations | Per-delegation checkpoint |
+| **Parallel** | Multiple independent bolts with no shared state | Per-agent, then integration check |
+| **Manual** | High-risk work or unfamiliar domain | Every step |
+
+See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for detailed mode selection guidance and transition criteria.
+
 ---
 
 ## Anti-Patterns
@@ -708,4 +789,4 @@ Avoid these common mistakes during Construction:
 - **Pillars:** [Security](../pillars/PILLAR-SECURITY.md) | [Quality](../pillars/PILLAR-QUALITY.md) | [Traceability](../pillars/PILLAR-TRACEABILITY.md) | [Cost Awareness](../pillars/PILLAR-COST.md)
 - **Governance:** [Solo + AI](../governance/SOLO-AI.md) | [Small Team](../governance/SMALL-TEAM.md) | [Enterprise](../governance/ENTERPRISE.md)
 - **Templates:** [PM-FRAMEWORK.md](../../templates/PM-FRAMEWORK.md) | [SOLO-AI-WORKFLOW-GUIDE.md](../../templates/SOLO-AI-WORKFLOW-GUIDE.md) | [TRACEABILITY-MATRIX.md](../../templates/TRACEABILITY-MATRIX.md)
-- **Reference:** [Bolt Metrics Guide](../reference/BOLT-METRICS-GUIDE.md) | [Glossary](../reference/GLOSSARY.md) | [Audit Scoring](../reference/AUDIT-SCORING.md)
+- **Reference:** [Bolt Metrics Guide](../reference/BOLT-METRICS-GUIDE.md) | [Glossary](../reference/GLOSSARY.md) | [Audit Scoring](../reference/AUDIT-SCORING.md) | [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md)

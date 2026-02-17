@@ -4,7 +4,7 @@
 
 - **Name:** AI-DLC (AI Development Life Cycle)
 - **Type:** Documentation framework / methodology standard
-- **Version:** 1.0.0
+- **Version:** 1.1.0
 - **License:** MIT
 
 ## What This Project Is
@@ -24,7 +24,7 @@ ai-dlc/
 │   ├── framework/               # 7 phase guides (PHASE-0 through PHASE-6)
 │   ├── pillars/                 # 4 cross-cutting concerns
 │   ├── governance/              # 3 team models (solo, small, enterprise)
-│   └── reference/               # 5 reference documents
+│   └── reference/               # 6 reference documents
 ├── templates/                   # 14 foundational document templates
 └── scripts/
     └── init.sh                  # Bootstrap script for new projects
@@ -72,6 +72,12 @@ Each phase guide follows this structure:
 - **Five-Persona Review** — AI reviews code from 5 hostile perspectives (attacker, auditor, ops, cost, user)
 - **Hardening** — Dedicated phase between construction and operations for production readiness
 - **Traceability Matrix** — Maps requirements → stories → specs → code → tests → deployments
+- **The Ascent** — Persistence loop that verifies completion against all acceptance criteria before declaring done
+- **Trust-Adaptive Gates** — Review ceremony that scales with earned trust (levels 0-3) while risk tiers enforce full review on critical work
+- **IDEA → INTENT → UNIT → BOLT** — Four-level artifact hierarchy with conformance scoring between levels
+- **Conformance Score** — Percentage (0-100%) measuring how well a child artifact addresses its parent
+- **Risk Tier** — Three-level classification (Critical, Significant, Normal) that overrides trust level for gate ceremony
+- **Olympian** — A specialized AI agent configured for a specific type of work (Builder, Reviewer, Scout, Scribe)
 
 ## Quality Standards
 

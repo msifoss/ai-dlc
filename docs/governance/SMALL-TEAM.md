@@ -285,6 +285,26 @@ Individual bolts proceed without team-wide review. The PR process provides suffi
 | Configuration change | Skip PRD and SPEC; single bolt with PR review |
 | Hotfix | Skip everything; fix, test, deploy, then write the captain's log after |
 
+### Multi-Agent Delegation Patterns
+
+Small teams can leverage multi-agent patterns where different team members (or their AI sessions) specialize in different roles:
+
+| Role | Owner | AI Specialization | Gates Owned |
+|------|-------|-------------------|-------------|
+| **PM / Product** | Product-focused developer | Requirements, user stories, acceptance criteria | Gate 1 (PRD), Gate 2 (SPEC) |
+| **Dev / Builder** | Implementation developer | Code generation, test writing, debugging | Gate 3 (Implementation), Gate 4 (Review) |
+| **Reviewer** | Reviewing developer | Five-persona review, code analysis | Quality verification |
+| **Ops** | Ops-focused developer | Infrastructure, deployment, monitoring | Deploy coordination |
+
+**Delegation flow:**
+1. PM role creates IDEA and PRD artifacts with AI assistance
+2. Dev role elaborates into SPEC and INTENTS with AI assistance
+3. Builder AI executes bolts using The Ascent pattern
+4. Reviewer role conducts post-bolt and phase reviews
+5. Ops role manages deployment using the Summit pattern
+
+This maps naturally to the [multi-agent specialization model](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) — each developer's AI session is configured for their role.
+
 ---
 
 ## Communication Patterns
@@ -525,3 +545,4 @@ Hold a monthly 10-minute cost review:
 - [Quality Pillar](../pillars/PILLAR-QUALITY.md) — Cross-phase quality checklist
 - [Traceability Pillar](../pillars/PILLAR-TRACEABILITY.md) — Cross-phase traceability checklist
 - [Cost Awareness Pillar](../pillars/PILLAR-COST.md) — Cross-phase cost checklist
+- [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) — Multi-agent delegation, execution modes

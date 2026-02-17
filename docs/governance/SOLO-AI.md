@@ -333,6 +333,71 @@ The solo+AI daily workflow follows a consistent rhythm. Consistency reduces cogn
 
 ---
 
+## The Ascent as Persistence Practice
+
+The Ascent is the solo developer's most important discipline. Without a teammate to catch incomplete work, you must verify completion rigorously before moving on.
+
+### The Loop
+
+```
+IMPLEMENT → VERIFY (run all tests) → CHECK (every acceptance criterion) → All met? → DONE
+                                                                             │
+                                                                             NO → Fix and loop
+```
+
+### Why Solo Developers Need The Ascent
+
+In a team, incomplete work is caught during code review. Solo developers have no such safety net. The Ascent replaces peer review with systematic self-verification:
+
+- Run the **full** test suite, not just new tests
+- Check **every** acceptance criterion, not just the primary one
+- Verify **no regressions** in adjacent components
+- Write the captain's log with **evidence** of completion
+
+### Execution Mode Selection
+
+Select the mode that matches your current work:
+
+| Mode | Best For | Solo Workflow |
+|------|----------|---------------|
+| **The Ascent** | Most bolt work | Default — use for every bolt |
+| **Orchestrated** | Complex features needing multiple AI specializations | Switch AI sessions between Builder, Reviewer, Scout roles |
+| **Parallel** | Multiple independent bolts | Use background agents for independent tasks |
+| **Manual** | High-risk or unfamiliar work | Full human oversight on every step |
+
+See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for detailed mode descriptions.
+
+---
+
+## The Learning Paradox in Solo+AI
+
+> "Human-in-the-training-loop, not human-in-the-loop."
+
+The most effective solo+AI developers invest heavily in training the system — writing comprehensive context files, documenting patterns, and providing corrective feedback — so the AI can execute autonomously within trained boundaries.
+
+**The investment:** Each bolt should end with a context file update. Every correction during Five Questions becomes a permanent rule. Every pattern discovered enters the pattern catalog.
+
+**The payoff:** After 20+ bolts, the AI produces code that matches your conventions, avoids known anti-patterns, and requires fewer corrections. The Five Questions cycles become shorter as the context file absorbs more decisions.
+
+---
+
+## Trust-Adaptive Gates for Solo Workflow
+
+Solo developers can reduce ceremony as trust builds, while maintaining full ceremony for high-risk work.
+
+| Trust Level | Solo Ceremony | Earned After |
+|-------------|---------------|-------------|
+| Level 0 (New) | Review every diff in detail; run all checks manually | Start of project |
+| Level 1 (Established) | Review at phase transitions; spot-check during construction | 5+ clean bolts |
+| Level 2 (Trusted) | Review major decisions and phase transitions | 20+ bolts, minimal rework |
+| Level 3 (Autonomous) | Review at human decision gates only; trust automated checks | Extended track record |
+
+**Risk tier override:** Regardless of trust level, always apply full ceremony (Level 0) for authentication, payment processing, PII handling, and cryptography changes.
+
+See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for trust level definitions and risk tier overrides.
+
+---
+
 ## Phase-Specific Guidance
 
 The Solo+AI model applies across all AI-DLC phases, but the human-AI dynamic shifts.
@@ -516,3 +581,4 @@ When upgrading from Solo+AI to Small Team:
 - [Quality Pillar](../pillars/PILLAR-QUALITY.md) — Cross-phase quality checklist
 - [Traceability Pillar](../pillars/PILLAR-TRACEABILITY.md) — Cross-phase traceability checklist
 - [Cost Awareness Pillar](../pillars/PILLAR-COST.md) — Cross-phase cost checklist
+- [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) — The Ascent, trust-adaptive gates, execution modes

@@ -486,6 +486,41 @@ The enterprise pipeline extends the Small Team structured workflow with formal g
 
 **Legend:** R = Responsible (does the work), A = Accountable (approves/owns), C = Consulted (input required), I = Informed (kept in the loop)
 
+### Trust-Adaptive Ceremony at Enterprise Scale
+
+Enterprise teams apply trust-adaptive gates while maintaining compliance requirements. Trust reduces ceremony for normal-risk work but never overrides compliance gates.
+
+| Trust Level | Normal-Risk Ceremony | Compliance-Required Ceremony |
+|-------------|---------------------|------------------------------|
+| Level 0 (New team) | Full review on every deliverable | Full review + compliance sign-off |
+| Level 1 (Established) | Review at phase transitions | Full review + compliance sign-off |
+| Level 2 (Trusted) | Spot-check construction, review phases | Standard review + compliance sign-off |
+| Level 3 (Autonomous) | Human decision gates only | Minimal review + compliance sign-off |
+
+**Key principle:** Compliance gates (SOC 2, HIPAA, GDPR, PCI-DSS) are never reduced by trust level. Trust-adaptive gates reduce internal ceremony only — regulatory ceremony is fixed.
+
+### Risk Tier Override Rules
+
+| Risk Tier | Description | Enterprise Gate Impact |
+|-----------|-------------|----------------------|
+| **Tier 1: Critical** | Auth, payments, PII, cryptography | Full ceremony always — security team review mandatory |
+| **Tier 2: Significant** | API contracts, data model, infrastructure | Standard ceremony minimum — architecture review board consulted |
+| **Tier 3: Normal** | Feature implementation, UI, configuration | Trust-level ceremony applies — team-internal review sufficient |
+
+### PM / Dev / AI Responsibility Matrix
+
+| Activity | Product Manager | Developer | AI Agent | Security Champion |
+|----------|----------------|-----------|----------|-------------------|
+| IDEA creation | **Owner** | Consulted | Assists (research, analysis) | — |
+| INTENT elaboration | **Approver** | Owner | Proposes (Five Questions) | Consulted (Tier 1) |
+| UNIT specification | Consulted | **Owner** | Proposes (tech spec) | Reviews (Tier 1-2) |
+| BOLT execution | — | Reviews | **Executor** (The Ascent) | — |
+| Gate 1-2 (PRD/SPEC) | **Approver** | Contributor | Generator | Consulted |
+| Gate 3-4 (Implementation/Review) | Informed | **Approver** | Executor + self-review | Reviews (Tier 1-2) |
+| Phase transition | Approver | **Presenter** | Evidence generator | Approver (security gate) |
+
+See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for trust level definitions, risk tier overrides, and execution mode selection.
+
 ### Team-Level Captain's Logs
 
 At enterprise scale, captain's logs serve two audiences:
@@ -604,3 +639,4 @@ Team-level summaries go in:
 - [Quality Pillar](../pillars/PILLAR-QUALITY.md) — Cross-phase quality checklist
 - [Traceability Pillar](../pillars/PILLAR-TRACEABILITY.md) — Cross-phase traceability checklist
 - [Cost Awareness Pillar](../pillars/PILLAR-COST.md) — Cross-phase cost checklist
+- [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) — Trust-adaptive gates, risk tiers, responsibility matrix

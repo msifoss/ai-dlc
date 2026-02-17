@@ -113,6 +113,16 @@ Understand and codify team and developer preferences for code style, architectur
 3. Quarterly, review merged PRs for patterns in human-applied changes to AI-generated code.
 4. Synthesize into concrete rules: not "write clean code" but "use early returns instead of nested if/else blocks."
 
+**Preference storage and lifecycle:**
+
+| Aspect | Implementation |
+|--------|---------------|
+| **Storage format** | Key-value entries in context file with category tags |
+| **Rotation** | Review all preferences quarterly; archive stale entries |
+| **30-day decay** | Preferences not reinforced within 30 days are flagged for review — team habits evolve, and outdated preferences produce wrong output |
+| **Conflict resolution** | When preferences conflict, the most recent human correction wins |
+| **Scope** | Team-level preferences go in shared CLAUDE.md; individual preferences go in personal context files |
+
 #### Phase L4: Context Injection
 
 Update CLAUDE.md and supporting context files with extracted patterns and learned preferences. This is the mechanism that prevents repeated mistakes and amplifies successful approaches.
@@ -151,6 +161,15 @@ Identify new automation opportunities, workflow improvements, and areas where AI
 3. **New tool integration** — Evaluate emerging AI capabilities against current workflow gaps.
 4. **Cross-project patterns** — If multiple projects share patterns, extract them into shared context files or reusable bolt templates.
 5. **Monitoring intelligence** — Can anomaly detection replace threshold-based alerts?
+
+**Technical insights to capture during discovery:**
+
+- **Gotchas** — Library behaviors that differ from documentation, edge cases in APIs, platform-specific quirks
+- **Workarounds** — Proven solutions for known issues with dependencies or infrastructure
+- **Performance patterns** — Query optimizations, caching strategies, and resource management techniques that worked in production
+- **Integration patterns** — Successful approaches for connecting services, handling authentication across boundaries, managing state
+
+Store discoveries in the pattern catalog with links to the originating bolts and incidents. Each discovery should include the context in which it was found, so future sessions can apply it correctly.
 
 **Agent discovery log template:**
 
@@ -419,6 +438,7 @@ Track improvement over time. If Phase 6 is working, these metrics trend in the r
 | Dependency freshness | Maintaining | % of dependencies within one minor version of latest | Monthly |
 | Context file accuracy | High | % of context rules that still apply (quarterly audit) | Quarterly |
 | Process adherence | High | % of bolts following documented workflow | Quarterly |
+| Trust level | Increasing | Current trust level (0-3) based on track record — see [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) | Per bolt |
 
 #### Retrospective Cadence
 
@@ -546,6 +566,7 @@ Phase 6 does not have traditional exit criteria — it runs continuously. Howeve
 | [Phase 3: Construction](PHASE-3-CONSTRUCTION.md) | Pattern extraction directly improves bolt execution and AI code generation |
 | [Phase 4: Hardening](PHASE-4-HARDENING.md) | Quarterly security re-reviews extend the hardening practice indefinitely |
 | [Phase 5: Operations](PHASE-5-OPERATIONS.md) | Passive feedback depends on operational monitoring; drift detection extends ops |
+| [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) | Trust-adaptive gates and learning system implementation |
 
 ---
 

@@ -68,7 +68,7 @@ The assessment evaluates nine dimensions that span the entire AI-DLC lifecycle. 
 | 3-4 | User stories exist but lack acceptance criteria or lack Given-When-Then format. Spec is informal. Matrix is missing or stub. |
 | 5-6 | User stories have acceptance criteria. Technical spec covers main components. Traceability matrix links REQ to Story to Spec. Five Questions used on at least some features. |
 | 7-8 | All stories satisfy INVEST criteria. Technical spec includes API contracts, data models, and error handling. Traceability matrix has no orphan rows. Momus and Metis gates passed. Five Questions used on all feature areas. |
-| 9-10 | Specifications are precise enough that Construction flows without ambiguity. All Five Questions "Correct" responses reflected in specs. Validation gates documented with findings. All edge cases and abuse cases specified. Human sign-off on PRD and tech spec. |
+| 9-10 | Specifications are precise enough that Construction flows without ambiguity. All Five Questions "Correct" responses reflected in specs. Validation gates documented with findings. All edge cases and abuse cases specified. Human sign-off on PRD and tech spec. Artifact hierarchy (IDEA → INTENT → UNIT → BOLT) fully elaborated with conformance scores >= 90%. Dependency graph generated for bolt sequencing. |
 
 **Key artifacts:** USER-STORIES.md, technical specification, TRACEABILITY-MATRIX.md, Five Questions logs
 
@@ -82,7 +82,7 @@ The assessment evaluates nine dimensions that span the entire AI-DLC lifecycle. 
 | 3-4 | Some bolt structure but inconsistent. Tests exist for some features. Captain's logs written sporadically. |
 | 5-6 | Consistent bolt workflow (plan, execute, review, retro). Tests paired with code for most bolts. Captain's logs written for most bolts. Commit messages follow conventions. |
 | 7-8 | Every bolt has a captain's log. Test delta is positive for every sprint. Bolt metrics tracked (commits, lines, tests, time). T-shirt sizing used and calibrated. Traceability matrix updated per bolt. |
-| 9-10 | Bolt discipline is exemplary: clear scope, accurate estimation, paired tests, retro insights captured. Test coverage exceeds 80%. Commit messages reference requirement IDs. Context file updated during construction. Zero XL bolts (all split during planning). |
+| 9-10 | Bolt discipline is exemplary: clear scope, accurate estimation, paired tests, retro insights captured. Test coverage exceeds 80%. Commit messages reference requirement IDs. Context file updated during construction. Zero XL bolts (all split during planning). Multi-agent execution model applied where appropriate (specialized agents for review, research, documentation). The Ascent verification loop consistently followed — every bolt verified against all acceptance criteria before completion. |
 
 **Key artifacts:** Captain's logs, bolt metrics, test suite, traceability matrix updates, commit history
 
@@ -138,7 +138,7 @@ The assessment evaluates nine dimensions that span the entire AI-DLC lifecycle. 
 | 3-4 | Occasional retrospectives. Context file updated sporadically. No drift detection. |
 | 5-6 | Regular bolt retros. Context file updated with major learnings. Some drift detection (dependency updates). Quarterly security re-review scheduled. |
 | 7-8 | Five-phase learning loop active (passive feedback, pattern extraction, preference learning, context injection, agent discovery). Drift detection across infrastructure, configuration, process, and dependencies. Quarterly retrospectives with action items. Patterns extracted and documented. |
-| 9-10 | Learning system is continuous and measurable. Context file accuracy audited quarterly. Decommissioning procedures followed for retired features. Metrics dashboard current with positive trends. Framework improvement proposals submitted. Case study documented. Team demonstrates measurable improvement in velocity, quality, and security over time. |
+| 9-10 | Learning system is continuous and measurable. Context file accuracy audited quarterly. Decommissioning procedures followed for retired features. Metrics dashboard current with positive trends. Framework improvement proposals submitted. Case study documented. Team demonstrates measurable improvement in velocity, quality, and security over time. Automated learning system active: feedback capture, pattern extraction with 30-day decay, preference learning, and context injection. Agent discoveries documented and integrated. |
 
 **Key artifacts:** Updated CLAUDE.md, pattern catalog, drift reports, retrospective records, metrics dashboard, case study
 
@@ -152,7 +152,7 @@ The assessment evaluates nine dimensions that span the entire AI-DLC lifecycle. 
 | 3-4 | Some human decisions visible but sparse. Most logs read like AI-generated output. Deploys appear automated without human review. Security findings lack human triage. |
 | 5-6 | Human decisions visible in some logs. Security reviews have human-assigned dispositions. Deploys are human-initiated. Some architecture choices show human judgment. Five Questions Pattern used occasionally. |
 | 7-8 | Captain's logs clearly show human voice and decision-making. Security findings human-triaged with rationale. Deploy approval gates in place. Five Questions Pattern used consistently. Architecture decisions include human rationale and rejected alternatives. |
-| 9-10 | Exemplary human-AI partnership. Logs show clear division of labor. Human overrides documented with rationale. AI suggestions rejected when appropriate. Human owns scope, priorities, and final approval. Evidence of the human teaching the AI through context file improvements. Five Questions Pattern is second nature. |
+| 9-10 | Exemplary human-AI partnership. Logs show clear division of labor. Human overrides documented with rationale. AI suggestions rejected when appropriate. Human owns scope, priorities, and final approval. Evidence of the human teaching the AI through context file improvements. Five Questions Pattern is second nature. Trust-adaptive gates implemented — ceremony scales with track record while risk tiers enforce full review on critical work. The Learning Paradox embraced: human invests in training the system, not reviewing every output. |
 
 **Key artifacts:** Captain's logs with human voice, security finding dispositions, deploy approval records, Five Questions logs, architecture decision rationale
 
@@ -306,3 +306,4 @@ Schedule a re-audit after completing the improvement actions. Recommended cadenc
 - [Five-Persona Review](FIVE-PERSONA-REVIEW.md) — Dimension 5 methodology
 - [Bolt Metrics Guide](BOLT-METRICS-GUIDE.md) — Dimension 4 metrics
 - [Glossary](GLOSSARY.md) — Key terms
+- [Autonomous Execution Guide](AUTONOMOUS-EXECUTION-GUIDE.md) — Execution model and trust-adaptive gates

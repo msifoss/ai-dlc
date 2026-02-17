@@ -10,6 +10,58 @@ Phase 1 (Inception) produced high-level requirements and architectural direction
 
 By the end of this phase, every requirement has a user story, every user story has acceptance criteria, every component has a technical specification, and a traceability matrix links them all together. This is the last phase before code is written. Get it right here, and Construction flows. Get it wrong, and you build the wrong thing fast.
 
+### The Artifact Hierarchy: IDEA → INTENT → UNIT → BOLT
+
+Phase 2 converts high-level IDEAs (from Phase 1) into increasingly detailed artifacts through a four-level hierarchy. Each level refines and validates against its parent, ensuring no requirement is lost or distorted.
+
+```
+IDEA (Phase 1)
+  └── INTENT (what to achieve, with measurable criteria)
+        └── UNIT (testable specification chunk)
+              └── BOLT (executable unit of work)
+```
+
+| Level | Purpose | Validation | Example |
+|-------|---------|------------|---------|
+| **IDEA** | Problem statement with business context | Human approval at Phase 1 gate | "Users need to reset passwords securely" |
+| **INTENT** | Measurable objective derived from the IDEA | Conformance check against IDEA | "Implement password reset with email verification, rate limiting, and token expiry" |
+| **UNIT** | Testable specification chunk with acceptance criteria | Momus + Metis gates | "Token generation: cryptographic token, 15-min expiry, single-use, stored hashed" |
+| **BOLT** | Executable work unit with scope, tests, and time box | The Ascent verification loop | "Implement token generation endpoint with 4 tests (happy path, expired, reused, rate-limited)" |
+
+#### Conformance Scoring
+
+Validate each artifact against its parent using conformance scoring:
+
+| Score | Meaning | Action |
+|-------|---------|--------|
+| 90-100% | Full alignment — child fully addresses parent | Proceed |
+| 70-89% | Partial alignment — minor gaps | Address gaps before proceeding |
+| 50-69% | Significant gaps — child drifts from parent | Revise child artifact; re-run Five Questions |
+| Below 50% | Misalignment — child does not address parent | Reject; return to parent level and re-elaborate |
+
+#### Dual Validation
+
+Every artifact validates in two directions:
+
+1. **Against parent** — Does this UNIT satisfy its INTENT? Does this INTENT satisfy its IDEA?
+2. **Against root** — Does this BOLT still serve the original IDEA? (Prevents drift through layers)
+
+If dual validation reveals divergence, stop and realign before proceeding. Drift detected at the BOLT level costs hours to fix. Drift detected at the INTENT level costs days.
+
+#### Dependency Graph Generation
+
+When elaborating INTENTs into UNITs, generate a dependency graph that shows which UNITs must complete before others can begin. This graph drives bolt sequencing in [Phase 3: Construction](PHASE-3-CONSTRUCTION.md).
+
+```markdown
+## Dependency Graph: [Feature Name]
+
+UNIT-001: Database schema → No dependencies (start here)
+UNIT-002: Token generation → Depends on UNIT-001
+UNIT-003: Email dispatch → Depends on UNIT-002
+UNIT-004: Reset endpoint → Depends on UNIT-002, UNIT-003
+UNIT-005: Rate limiting → Depends on UNIT-004
+```
+
 ---
 
 ## Entry Criteria
@@ -270,6 +322,9 @@ Run this checklist against every technical specification:
 - [ ] Edge cases are documented (empty inputs, max limits, Unicode, timezone boundaries)
 - [ ] Security assumptions from Five Questions are reflected in the spec
 - [ ] Performance targets are stated with specific metrics (p50, p95, p99)
+- [ ] Coverage of parent INTENT is >= 90% (conformance score)
+- [ ] All user stories have measurable acceptance criteria (no subjective terms)
+- [ ] Story count per INTENT is sufficient to cover all specified behaviors
 
 #### Metis Gate Checklist
 
@@ -281,6 +336,9 @@ Run this checklist at the feature level:
 - [ ] The data model supports likely future requirements without over-engineering
 - [ ] The user experience flow is coherent end-to-end, not just per-story
 - [ ] Cost implications of the design are understood (see [Cost Awareness Pillar](../pillars/PILLAR-COST.md))
+- [ ] Architecture soundness verified — components have clear boundaries and single responsibilities
+- [ ] API contracts are explicit with request/response schemas, error codes, and versioning
+- [ ] Component separation supports independent testing and deployment
 
 #### Validation Gate Protocol
 
@@ -501,4 +559,4 @@ Phase 1 produced REQ-010: "The system must notify users of important events via 
 - **Pillars:** [Security](../pillars/PILLAR-SECURITY.md) | [Quality](../pillars/PILLAR-QUALITY.md) | [Traceability](../pillars/PILLAR-TRACEABILITY.md) | [Cost Awareness](../pillars/PILLAR-COST.md)
 - **Governance:** [Solo + AI](../governance/SOLO-AI.md) | [Small Team](../governance/SMALL-TEAM.md) | [Enterprise](../governance/ENTERPRISE.md)
 - **Templates:** [USER-STORIES.md](../../templates/USER-STORIES.md) | [TRACEABILITY-MATRIX.md](../../templates/TRACEABILITY-MATRIX.md) | [REQUIREMENTS.md](../../templates/REQUIREMENTS.md)
-- **Reference:** [Glossary](../reference/GLOSSARY.md) | [Audit Scoring](../reference/AUDIT-SCORING.md)
+- **Reference:** [Glossary](../reference/GLOSSARY.md) | [Audit Scoring](../reference/AUDIT-SCORING.md) | [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md)

@@ -322,6 +322,49 @@ Formal review with AI augmentation and dedicated security review for sensitive c
 | Architecture review board | Phase transitions | Architecture approval |
 | Compliance review | Before release | Compliance attestation |
 
+### Oracle Verification Pattern
+
+The Oracle pattern is a production-ready checklist that AI agents run before declaring any deliverable complete. It acts as the final quality gate before human review.
+
+**Oracle checklist:**
+
+- [ ] All acceptance criteria from the user story are explicitly verified
+- [ ] All tests pass (unit, integration, and e2e as applicable)
+- [ ] Linter and type checker produce zero errors
+- [ ] No regressions in existing tests
+- [ ] Code matches the technical specification (no drift)
+- [ ] Security-sensitive changes flagged for Phase 4 review
+- [ ] Traceability matrix updated with code path and test ID
+- [ ] Captain's log entry written with evidence of completion
+
+Run the Oracle checklist at the Review step of every bolt. The Oracle does not replace human review — it ensures human reviewers receive verified, complete work.
+
+### Artifact Conformance Scoring
+
+Validate specifications against their parent artifacts using conformance scoring:
+
+| Score | Meaning | Quality Impact |
+|-------|---------|---------------|
+| 90-100% | Full alignment | Proceed to construction — specification is sound |
+| 70-89% | Partial alignment | Address gaps before construction; flag for reviewer |
+| 50-69% | Significant gaps | Return to elaboration; do not proceed to construction |
+| Below 50% | Misalignment | Reject; restart elaboration from parent artifact |
+
+See [Phase 2: Elaboration](../framework/PHASE-2-ELABORATION.md) for the artifact hierarchy and validation process.
+
+### Trust-Adaptive Review Thresholds
+
+Scale review intensity based on earned trust:
+
+| Trust Level | Review Depth | Coverage Check |
+|-------------|-------------|---------------|
+| Level 0 (New) | Line-by-line review of all changes | 100% of new code reviewed |
+| Level 1 (Established) | Focus on logic, security, and API surfaces | 80% of new code reviewed |
+| Level 2 (Trusted) | Focus on architecture-impacting and security-sensitive changes | 50% of new code reviewed |
+| Level 3 (Autonomous) | Automated checks + human review at phase gates only | Spot-check 20% of new code |
+
+**Risk tier override:** All Tier 1 (Critical) changes receive Level 0 review regardless of trust. See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for trust level definitions.
+
 ---
 
 ## Test-Paired Development
@@ -452,3 +495,4 @@ Add a function -- add a test. Fix a bug -- add a regression test first. Refactor
 
 - [Bolt Metrics Guide](../reference/BOLT-METRICS-GUIDE.md) — Quality metrics per bolt
 - [Audit Scoring](../reference/AUDIT-SCORING.md) — Assessment methodology including quality dimension
+- [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) — Oracle verification, trust-adaptive review

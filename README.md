@@ -123,6 +123,12 @@ Five-persona security review: the AI reviews its own code from hostile perspecti
 ### 6. Cost as a First-Class Citizen
 Cost management is designed from day one, not bolted on post-deployment. Budget → Monitor → Dashboard → Kill Switch.
 
+### 7. Autonomous Execution with The Ascent
+AI agents persist until verified complete — not until the first test passes. The Ascent loop (implement → verify → check criteria → fix or confirm) replaces the "generate and declare done" pattern with disciplined self-verification.
+
+### 8. Trust-Adaptive Gates
+Review ceremony scales with earned trust. New projects start with full review of every diff. Mature projects with proven track records earn reduced ceremony — but high-risk work (auth, payments, PII) always receives full scrutiny regardless of trust level.
+
 ---
 
 ## Governance Models
@@ -178,7 +184,8 @@ AI-DLC includes [14 foundational document templates](templates/) ready to use in
 - [Bolt Metrics Guide](docs/reference/BOLT-METRICS-GUIDE.md) — Measure velocity and quality
 - [Five-Persona Review](docs/reference/FIVE-PERSONA-REVIEW.md) — Detailed review methodology
 - [AWS Well-Architected Mapping](docs/reference/AWS-WELL-ARCHITECTED-MAPPING.md) — AI-DLC to WAF alignment
-- [Audit Scoring](docs/reference/AUDIT-SCORING.md) — 8-dimension assessment methodology
+- [Audit Scoring](docs/reference/AUDIT-SCORING.md) — 9-dimension assessment methodology
+- [Autonomous Execution Guide](docs/reference/AUTONOMOUS-EXECUTION-GUIDE.md) — The Ascent, multi-agent execution, trust-adaptive gates
 - [Glossary](docs/reference/GLOSSARY.md) — Key terms and definitions
 
 ---

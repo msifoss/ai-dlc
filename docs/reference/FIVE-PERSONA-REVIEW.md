@@ -379,6 +379,22 @@ In enterprise contexts, the five-persona review integrates with existing securit
 
 Enterprise teams may add additional personas (e.g., Regulator, Data Scientist, Third-Party Vendor) based on their specific risk profile.
 
+### Agent-Backed Review (Scaling Approach)
+
+For projects using multi-agent execution, persona reviews can be delegated to specialized reviewer agents. Each agent runs one persona independently, producing findings in parallel.
+
+| Persona | Agent Configuration | Mapping to AI-DLC Concepts |
+|---------|--------------------|-----------------------------|
+| Attacker | Security-focused reviewer with OWASP context | Maps to the **Momus Gate** — finding gaps and vulnerabilities |
+| Auditor | Compliance-focused reviewer with regulatory context | Maps to compliance evidence collection |
+| Ops Engineer | Operations-focused reviewer with infrastructure context | Maps to ops readiness verification |
+| Cost Analyst | Cost-focused reviewer with billing context | Maps to cost awareness pillar |
+| End User | UX-focused reviewer with user journey context | Maps to the **Metis Gate** — strategic alignment and user value |
+
+The Momus persona (critic) maps most directly to the Attacker and Auditor personas — both seek to break assumptions. The Metis persona (wisdom) maps to the End User and Cost Analyst — both ask whether the solution serves its purpose.
+
+See the [Autonomous Execution Guide](AUTONOMOUS-EXECUTION-GUIDE.md) for multi-agent delegation patterns and smart model routing.
+
 ---
 
 ## Real-World Example: 200+ Findings in 9 Days
@@ -439,3 +455,4 @@ Without the five-persona review, these 217 findings would have entered productio
 - [Security Review Protocol Template](../../templates/SECURITY-REVIEW-PROTOCOL.md) — Template for documenting reviews
 - [Audit Scoring](AUDIT-SCORING.md) — Security posture dimension scoring
 - [Glossary](GLOSSARY.md) — Five-Persona Review definition
+- [Autonomous Execution Guide](AUTONOMOUS-EXECUTION-GUIDE.md) — Multi-agent review delegation

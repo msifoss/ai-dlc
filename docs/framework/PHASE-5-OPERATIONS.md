@@ -528,7 +528,51 @@ When I say /prodstatus, perform the following:
 
 ---
 
-### 5.7 Incident Response Procedures
+### 5.7 AI-Generated Deployment Artifacts (The Summit Pattern)
+
+Use AI to automatically generate deployment artifacts from the codebase, specifications, and operational context. This pattern — called the Summit — produces deployment-ready documentation without manual authoring.
+
+#### Auto-Generated Artifacts
+
+| Artifact | Generated From | Output |
+|----------|---------------|--------|
+| **Deployment guide** | CI/CD config, infrastructure code, environment variables | Step-by-step deployment runbook with environment-specific values |
+| **Runbooks** | Error handling code, alarm definitions, monitoring config | Symptom-based triage procedures linked to specific alarms |
+| **Monitoring config** | Application metrics, health checks, SLO definitions | Dashboard definitions and alarm configurations |
+| **Release notes** | Git log, captain's logs, traceability matrix | User-facing changelog with feature descriptions and known issues |
+
+#### How to Generate
+
+1. **Feed the AI your operational context:** CI/CD pipeline definition, infrastructure-as-code, alarm configurations, and recent captain's logs
+2. **Request artifact generation:** Ask the AI to produce each artifact type from the source material
+3. **Human review:** Review each generated artifact for accuracy — AI may miss environment-specific nuances
+4. **Iterate:** Update the generated artifacts as the system evolves; re-generate quarterly
+
+#### Example: Auto-Generated Release Notes
+
+```markdown
+# Release v1.3.0 — 2026-02-15
+
+## New Features
+- Password reset via email (US-005, US-006) — REQ-001
+- Session management with device listing (US-007) — REQ-003
+
+## Bug Fixes
+- Fixed rate limiter bypass on IPv6 addresses (SEC-015)
+
+## Known Issues
+- Report generation p95 latency trending upward (monitoring in place)
+
+## Deployment Notes
+- Database migration required: `alembic upgrade head`
+- New environment variable: `RESET_TOKEN_EXPIRY_MINUTES` (default: 15)
+```
+
+The Summit pattern reduces operational documentation burden while maintaining accuracy through human review. See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for execution mode guidance.
+
+---
+
+### 5.8 Incident Response Procedures
 
 Establish clear procedures for when things go wrong.
 
@@ -625,7 +669,7 @@ P4 (Low):
 
 ---
 
-### 5.8 Shared Infrastructure Management
+### 5.9 Shared Infrastructure Management
 
 For systems with shared infrastructure (VPCs, networking, shared databases), establish clear ownership and access patterns.
 
@@ -685,7 +729,7 @@ infrastructure/
 
 ---
 
-### 5.9 Blue/Green and Canary Deployment Strategies
+### 5.10 Blue/Green and Canary Deployment Strategies
 
 Choose a deployment strategy based on risk tolerance and rollback requirements.
 
@@ -745,7 +789,7 @@ Auto-rollback criteria during canary:
 
 ---
 
-### 5.10 Rollback Procedures and Blast Radius Management
+### 5.11 Rollback Procedures and Blast Radius Management
 
 #### Rollback Decision Matrix
 

@@ -20,6 +20,22 @@ A document that captures a significant architecture decision, the context in whi
 
 ---
 
+### Agent Routing
+
+The practice of directing AI tasks to models of appropriate capability based on task complexity. Lightweight tasks (formatting, boilerplate) use faster models; standard tasks (implementation, testing) use default models; complex tasks (security review, architecture) use the most capable models. Reduces cost without sacrificing quality.
+
+**Related:** [Autonomous Execution Guide](AUTONOMOUS-EXECUTION-GUIDE.md)
+
+---
+
+### The Ascent
+
+The persistence discipline in AI-DLC that requires AI agents to verify completion against all acceptance criteria before declaring a bolt done. The Ascent loop (implement → verify → check criteria → fix or confirm) replaces the common "generate and declare done" pattern. Premature declaration of completion is an anti-pattern.
+
+**Related:** [Autonomous Execution Guide](AUTONOMOUS-EXECUTION-GUIDE.md), [Phase 3: Construction](../framework/PHASE-3-CONSTRUCTION.md)
+
+---
+
 ### Bolt
 
 The atomic unit of work in AI-DLC. A bolt is a focused task typically lasting 1-4 hours that follows a four-step cycle: plan, execute, review, retro. Every bolt produces code, tests, and a captain's log entry. Bolts replace sprints as the primary planning unit in AI-assisted development.
@@ -41,6 +57,14 @@ Quantitative measurements captured for every bolt: commits, lines changed, tests
 AI-DLC's philosophy that working code is a better artifact for review than abstract specifications. Build the system in Phase 3, then dedicate Phase 4 to security, monitoring, cost controls, and operational readiness. This replaces the traditional approach of over-specifying before writing code.
 
 **Related:** [Phase 3: Construction](../framework/PHASE-3-CONSTRUCTION.md), [Phase 4: Hardening](../framework/PHASE-4-HARDENING.md)
+
+---
+
+### Conformance Score
+
+A percentage (0-100%) measuring how well a child artifact addresses its parent artifact in the IDEA → INTENT → UNIT → BOLT hierarchy. Scores below 70% indicate significant gaps requiring revision before proceeding. Used during Phase 2 Elaboration validation gates.
+
+**Related:** [Phase 2: Elaboration](../framework/PHASE-2-ELABORATION.md)
 
 ---
 
@@ -84,6 +108,14 @@ A queue that captures messages that failed processing after a configured number 
 
 ---
 
+### Dependency Graph
+
+An ordered map of UNIT-level artifacts showing which units must complete before others can begin. Generated during Phase 2 Elaboration and used to drive bolt sequencing in Phase 3 Construction.
+
+**Related:** [Phase 2: Elaboration](../framework/PHASE-2-ELABORATION.md)
+
+---
+
 ### Decommissioning
 
 The structured process of removing features, components, or infrastructure from a production system. Includes announcement, migration, code removal, data cleanup, infrastructure teardown, and traceability updates. Performed during Phase 6 Evolution.
@@ -124,6 +156,14 @@ The continuous improvement cycle in Phase 6 Evolution: Passive Feedback, Pattern
 
 ---
 
+### Forge
+
+The construction execution phase in the Olympus orchestration system. Corresponds to Phase 3 (Construction) in AI-DLC. Named for the idea that working software is forged through disciplined, iterative bolt execution.
+
+**Related:** [Phase 3: Construction](../framework/PHASE-3-CONSTRUCTION.md)
+
+---
+
 ### Five Questions Pattern
 
 AI-DLC's signature elaboration technique. Before implementation, the AI surfaces exactly five assumptions about the requirements. The human validates, corrects, or defers each assumption. This cycle repeats until no critical assumptions remain unvalidated. Prevents canary-bug errors.
@@ -148,6 +188,14 @@ The organizational structure that determines how decisions are made, reviews are
 
 ---
 
+### INTENT (Artifact)
+
+The second level of the artifact hierarchy (IDEA → INTENT → UNIT → BOLT). An INTENT is a measurable objective derived from an IDEA, with specific success criteria and scope boundaries. INTENTs are elaborated during Phase 2 and validated through conformance scoring against their parent IDEA.
+
+**Related:** [Phase 2: Elaboration](../framework/PHASE-2-ELABORATION.md)
+
+---
+
 ### Hardening
 
 Phase 4 of AI-DLC. A dedicated phase between Construction and Operations focused on production readiness. Organized into four bolts: Alarms + Monitoring (H1), Security Fixes (H2), Cost Controls (H3), and Ops Readiness Verification (H4). The key innovation of AI-DLC.
@@ -169,6 +217,22 @@ A point in the AI-DLC lifecycle where a conscious human decision is required. AI
 An automated mechanism that throttles or disables expensive operations when cost thresholds are breached. Kill switches prevent runaway cloud spend. Implemented during Phase 4 Hardening and tested before production deployment.
 
 **Related:** [Phase 4: Hardening](../framework/PHASE-4-HARDENING.md), [Cost Awareness Pillar](../pillars/PILLAR-COST.md)
+
+---
+
+### Learning Paradox
+
+The principle that the most effective AI-assisted development invests in training the system (context files, patterns, feedback) rather than reviewing every output. "Human-in-the-training-loop, not human-in-the-loop." The human's role shifts from reviewing individual outputs to improving the system that produces them.
+
+**Related:** [Autonomous Execution Guide](AUTONOMOUS-EXECUTION-GUIDE.md), [Phase 6: Evolution](../framework/PHASE-6-EVOLUTION.md)
+
+---
+
+### Magic Keywords
+
+Trigger phrases in context files or prompts that activate specific AI behaviors or workflows. Examples include `/prodstatus` for operational health summaries and `/dlc-audit` for compliance assessment. Magic keywords codify common operations into repeatable commands.
+
+**Related:** [Phase 5: Operations](../framework/PHASE-5-OPERATIONS.md)
 
 ---
 
@@ -204,11 +268,35 @@ A 47-item scored checklist across 8 categories (Logging, Monitoring, Alerting, E
 
 ---
 
+### Olympian
+
+A specialized AI agent configured for a specific type of work within the multi-agent execution model. Examples include Builder (implementation), Reviewer (quality analysis), Scout (research), and Scribe (documentation). The term originates from the Olympus orchestration system, which pioneered multi-agent specialization for AI-DLC workflows.
+
+**Related:** [Autonomous Execution Guide](AUTONOMOUS-EXECUTION-GUIDE.md)
+
+---
+
 ### Pattern Extraction
 
 The process of analyzing accumulated production feedback to identify recurring issues, successful approaches, and common mistakes. Part of the Five-Phase Learning Loop in Phase 6. Extracted patterns are injected into context files.
 
 **Related:** [Phase 6: Evolution](../framework/PHASE-6-EVOLUTION.md)
+
+---
+
+### Prometheus (Pattern)
+
+An interview-based requirement gathering pattern where the AI systematically interviews the human to extract requirements, constraints, and success criteria. Named for the Titan who brought knowledge to humanity. Used during Phase 1 Inception to formalize the IDEA artifact.
+
+**Related:** [Phase 1: Inception](../framework/PHASE-1-INCEPTION.md)
+
+---
+
+### Risk Tier
+
+A three-level classification of work based on potential impact. Tier 1 (Critical): authentication, payments, PII, cryptography. Tier 2 (Significant): API contracts, data model, infrastructure. Tier 3 (Normal): feature implementation, UI, configuration. Risk tiers override trust levels for gate ceremony decisions.
+
+**Related:** [Autonomous Execution Guide](AUTONOMOUS-EXECUTION-GUIDE.md), [Phase 1: Inception](../framework/PHASE-1-INCEPTION.md)
 
 ---
 
@@ -220,11 +308,27 @@ A four-level classification for security and operational findings: Critical (fix
 
 ---
 
+### Summit (Phase)
+
+The deployment artifact generation phase in the Olympus orchestration system. Corresponds to Phase 5 (Operations) in AI-DLC. The Summit pattern auto-generates deployment guides, runbooks, monitoring configurations, and release notes from the codebase and operational context.
+
+**Related:** [Phase 5: Operations](../framework/PHASE-5-OPERATIONS.md), [Autonomous Execution Guide](AUTONOMOUS-EXECUTION-GUIDE.md)
+
+---
+
 ### Test Delta
 
 The net change in test count for a bolt or sprint: tests added minus tests deleted. A positive test delta indicates growing test coverage. A negative or zero test delta is a warning sign that requires investigation.
 
 **Related:** [Bolt Metrics Guide](BOLT-METRICS-GUIDE.md), [Quality Pillar](../pillars/PILLAR-QUALITY.md)
+
+---
+
+### Trust Level
+
+A four-level scale (0-3) measuring earned confidence in AI execution quality. Level 0 (New): full ceremony required. Level 1 (Established): standard ceremony after 5+ clean bolts. Level 2 (Trusted): light ceremony after 20+ bolts with minimal rework. Level 3 (Autonomous): minimal ceremony with extended track record. Trust levels are overridden by risk tiers for high-impact work.
+
+**Related:** [Autonomous Execution Guide](AUTONOMOUS-EXECUTION-GUIDE.md)
 
 ---
 
@@ -260,11 +364,27 @@ See **Bolt**. The bolt is the fundamental unit of work in AI-DLC, replacing the 
 
 ---
 
+### UNIT (Artifact)
+
+The third level of the artifact hierarchy (IDEA → INTENT → UNIT → BOLT). A UNIT is a testable specification chunk derived from an INTENT, with specific acceptance criteria and defined scope. UNITs are validated through Momus and Metis gates during Phase 2 Elaboration.
+
+**Related:** [Phase 2: Elaboration](../framework/PHASE-2-ELABORATION.md)
+
+---
+
 ### Velocity
 
 The number of bolts completed per week. Measured at the sprint level. Healthy projects sustain 3-5 bolts/week for a solo developer + AI. Velocity should be stable or gradually increasing; declining velocity signals process friction or growing complexity.
 
 **Related:** [Bolt Metrics Guide](BOLT-METRICS-GUIDE.md)
+
+---
+
+### Vision Phase
+
+The initial planning phase in the Olympus orchestration system. Corresponds to Phases 0-1 (Foundation and Inception) in AI-DLC. The Vision phase establishes project identity, requirements, and architecture through structured IDEA artifacts and the Prometheus interview pattern.
+
+**Related:** [Phase 0: Foundation](../framework/PHASE-0-FOUNDATION.md), [Phase 1: Inception](../framework/PHASE-1-INCEPTION.md)
 
 ---
 
