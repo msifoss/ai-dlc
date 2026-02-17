@@ -89,6 +89,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CLAUDE.md — framework context file (practices what it preaches)
 - README.md — framework overview with quick start, comparison table, and architecture diagram
 - CHANGELOG.md — this file
+- docs/REQUIREMENTS.md — 23 framework requirements (10 FR, 8 NFR, 5 SEC) with IDs and traceability
+- docs/USER-STORIES.md — 10 user stories with acceptance criteria (Given/When/Then)
+- docs/TRACEABILITY-MATRIX.md — full REQ → Story → Spec → Document → Verification mapping
+- SECURITY.md — security policy with v1.1.0 content review findings
+- docs/decisions/ADR-001 through ADR-003 — architecture decision records
+- docs/captains_log/ — captain's log and retrospective for v1.1.0 meld
 
 [1.1.0]: https://github.com/your-org/ai-dlc/releases/tag/v1.1.0
 [1.0.0]: https://github.com/your-org/ai-dlc/releases/tag/v1.0.0
