@@ -1,16 +1,16 @@
-# Audit Scoring — 8-Dimension Assessment
+# Audit Scoring — 9-Dimension Assessment
 
-The `dlc-audit` assessment measures how well a project follows the AI-DLC framework across eight dimensions. Use it to identify gaps, track maturity over time, and demonstrate compliance to stakeholders.
+The `dlc-audit` assessment measures how well a project follows the AI-DLC framework across nine dimensions. Use it to identify gaps, track maturity over time, and demonstrate compliance to stakeholders.
 
 ---
 
 ## Overview
 
-The assessment evaluates eight dimensions that span the entire AI-DLC lifecycle. Each dimension scores 0-10 based on a rubric. The overall score is the average of all eight dimensions, mapped to a maturity rating.
+The assessment evaluates nine dimensions that span the entire AI-DLC lifecycle. Each dimension scores 0-10 based on a rubric. The overall score is the average of all nine dimensions, mapped to a maturity rating.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    8-DIMENSION ASSESSMENT                     │
+│                    9-DIMENSION ASSESSMENT                     │
 │                                                              │
 │  1. Foundation & Context ──── Phase 0                        │
 │  2. Requirements & Arch ───── Phase 1                        │
@@ -20,6 +20,7 @@ The assessment evaluates eight dimensions that span the entire AI-DLC lifecycle.
 │  6. Operational Readiness ─── Phase 4-5                      │
 │  7. Cost Management ──────── Cost Pillar (all phases)        │
 │  8. Evolution & Learning ──── Phase 6                        │
+│  9. Human-AI Collaboration ── Cross-cutting (all phases)     │
 │                                                              │
 │  Score each 0-10 → Average → Maturity Rating                │
 └─────────────────────────────────────────────────────────────┘
@@ -27,7 +28,7 @@ The assessment evaluates eight dimensions that span the entire AI-DLC lifecycle.
 
 ---
 
-## The 8 Dimensions
+## The 9 Dimensions
 
 ### Dimension 1: Foundation & Context (Phase 0)
 
@@ -141,6 +142,20 @@ The assessment evaluates eight dimensions that span the entire AI-DLC lifecycle.
 
 **Key artifacts:** Updated CLAUDE.md, pattern catalog, drift reports, retrospective records, metrics dashboard, case study
 
+### Dimension 9: Human-AI Collaboration Quality (Cross-cutting)
+
+**What it measures:** Whether humans are steering development decisions or just accepting AI output. The quality of the partnership between human judgment and AI capability.
+
+| Score | Criteria |
+|-------|----------|
+| 0-2 | No evidence of human decision-making in the development process. AI appears to be running on autopilot. No captain's logs or decision records. |
+| 3-4 | Some human decisions visible but sparse. Most logs read like AI-generated output. Deploys appear automated without human review. Security findings lack human triage. |
+| 5-6 | Human decisions visible in some logs. Security reviews have human-assigned dispositions. Deploys are human-initiated. Some architecture choices show human judgment. Five Questions Pattern used occasionally. |
+| 7-8 | Captain's logs clearly show human voice and decision-making. Security findings human-triaged with rationale. Deploy approval gates in place. Five Questions Pattern used consistently. Architecture decisions include human rationale and rejected alternatives. |
+| 9-10 | Exemplary human-AI partnership. Logs show clear division of labor. Human overrides documented with rationale. AI suggestions rejected when appropriate. Human owns scope, priorities, and final approval. Evidence of the human teaching the AI through context file improvements. Five Questions Pattern is second nature. |
+
+**Key artifacts:** Captain's logs with human voice, security finding dispositions, deploy approval records, Five Questions logs, architecture decision rationale
+
 ---
 
 ## Scoring Rubric
@@ -157,21 +172,21 @@ The assessment evaluates eight dimensions that span the entire AI-DLC lifecycle.
 
 ### Overall Score
 
-Calculate the overall score as the unweighted average of all eight dimensions:
+Calculate the overall score as the unweighted average of all nine dimensions:
 
 ```
-Overall Score = (D1 + D2 + D3 + D4 + D5 + D6 + D7 + D8) / 8
+Overall Score = (D1 + D2 + D3 + D4 + D5 + D6 + D7 + D8 + D9) / 9
 ```
 
 ### Maturity Rating
 
-| Overall Score | Rating | Description |
-|---------------|--------|-------------|
-| 0.0 - 3.0 | **Foundational** | The project lacks essential AI-DLC structure. Start with Phase 0 and build up. |
-| 3.1 - 5.0 | **Developing** | Core framework elements are in place but significant gaps remain. Focus on the lowest-scoring dimensions. |
-| 5.1 - 7.0 | **Operational** | The project follows AI-DLC practices consistently. Address remaining gaps to reach maturity. |
-| 7.1 - 9.0 | **Optimized** | The project demonstrates mature, thorough AI-DLC adoption. Continuous improvement is active. |
-| 9.1 - 10.0 | **Exemplary** | The project is a reference implementation of AI-DLC. All dimensions are strong and measurable. |
+| Overall Score | Rating | Letter | Description |
+|---------------|--------|--------|-------------|
+| 0.0 - 2.0 | **Foundational** | F | The project lacks essential AI-DLC structure. Start with Phase 0 and build up. |
+| 2.1 - 4.0 | **Developing** | D | Core framework elements are in place but significant gaps remain. Focus on the lowest-scoring dimensions. |
+| 4.1 - 6.0 | **Operational** | C | The project follows AI-DLC practices consistently. Address remaining gaps to reach maturity. |
+| 6.1 - 8.0 | **Optimized** | B | The project demonstrates mature, thorough AI-DLC adoption. Continuous improvement is active. |
+| 8.1 - 10.0 | **Exemplary** | A | The project is a reference implementation of AI-DLC. All dimensions are strong and measurable. |
 
 ---
 
@@ -217,26 +232,28 @@ Collect all project artifacts. Check each of the 14 foundational documents for p
 
 ### Step 2: Score Each Dimension
 
-For each of the eight dimensions, read the scoring rubric and assign a score based on the evidence. Be honest — inflated scores hide real gaps.
+For each of the nine dimensions, read the scoring rubric and assign a score based on the evidence. Be honest — inflated scores hide real gaps.
 
 Use this scoring worksheet:
 
 ```markdown
 ## DLC Audit — [Project Name] — [Date]
 
-| # | Dimension | Score | Evidence | Gaps |
-|---|-----------|-------|----------|------|
-| 1 | Foundation & Context | /10 | | |
-| 2 | Requirements & Architecture | /10 | | |
-| 3 | Specification & Elaboration | /10 | | |
-| 4 | Construction Process | /10 | | |
-| 5 | Security Posture | /10 | | |
-| 6 | Operational Readiness | /10 | | |
-| 7 | Cost Management | /10 | | |
-| 8 | Evolution & Learning | /10 | | |
+| # | Dimension | Score | Grade | Evidence | Gaps |
+|---|-----------|-------|-------|----------|------|
+| 1 | Foundation & Context | /10 | | | |
+| 2 | Requirements & Architecture | /10 | | | |
+| 3 | Specification & Elaboration | /10 | | | |
+| 4 | Construction Process | /10 | | | |
+| 5 | Security Posture | /10 | | | |
+| 6 | Operational Readiness | /10 | | | |
+| 7 | Cost Management | /10 | | | |
+| 8 | Evolution & Learning | /10 | | | |
+| 9 | Human-AI Collaboration | /10 | | | |
 
 **Overall Score:** ___ / 10
 **Maturity Rating:** ___
+**Letter Grade:** ___
 
 ### Top 3 Gaps
 1.
@@ -285,6 +302,7 @@ Schedule a re-audit after completing the improvement actions. Recommended cadenc
 - [Quality Pillar](../pillars/PILLAR-QUALITY.md) — Dimensions 4, 6 pillar guide
 - [Traceability Pillar](../pillars/PILLAR-TRACEABILITY.md) — Dimensions 3, 4 pillar guide
 - [Cost Awareness Pillar](../pillars/PILLAR-COST.md) — Dimension 7 pillar guide
+- [Solo+AI Governance](../governance/SOLO-AI.md) — Dimension 9 practices
 - [Five-Persona Review](FIVE-PERSONA-REVIEW.md) — Dimension 5 methodology
 - [Bolt Metrics Guide](BOLT-METRICS-GUIDE.md) — Dimension 4 metrics
 - [Glossary](GLOSSARY.md) — Key terms
