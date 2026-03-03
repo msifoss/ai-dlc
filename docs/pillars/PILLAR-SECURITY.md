@@ -146,12 +146,13 @@ Classify every finding using this four-level severity scale. Severity determines
 | **High** | Exploitable with moderate effort. Significant data or system risk. | Fix within the current bolt. | Missing CSRF protection on state-changing routes, weak password hashing, overly permissive IAM role |
 | **Medium** | Defense-in-depth gap. Exploitable only with chained vulnerabilities. | Fix within the current phase. | Missing rate limiting, verbose error messages, HTTP-only flag missing on cookies |
 | **Low** | Best practice deviation. Minimal direct risk. | Fix when convenient. | Security headers missing (CSP, HSTS), outdated but unaffected dependency, log format inconsistency |
+| **Informational** | Observation or positive finding. No action required. | Document for reference. | Well-implemented control worth noting, architectural strength, defense-in-depth observation |
 
 ### Escalation Rules
 
 - Two or more **High** findings in the same component — escalate to **Critical** (systemic issue).
 - Any finding involving PII or credentials — minimum severity is **High**.
-- Any finding reintroduced after previous closure — escalate one level and add root cause analysis.
+- Any finding reintroduced after previous verified closure — escalate one level and add root cause analysis.
 
 ---
 
@@ -186,7 +187,7 @@ Document every "Won't Fix" decision with:
 
 ## OWASP Top 10 Integration
 
-Map each OWASP Top 10 (2021) category to specific AI-DLC review activities.
+Map each OWASP Top 10 (2021) category to specific AI-DLC review activities. Note: OWASP updates the Top 10 periodically — verify the current version at [owasp.org/Top10](https://owasp.org/www-project-top-ten/) before conducting reviews.
 
 | # | OWASP Category | AI-DLC Review Activity | Phase Focus |
 |---|---|---|---|
@@ -389,6 +390,22 @@ Protect every API endpoint as a potential attack surface.
 - [Phase 4: Hardening](../framework/PHASE-4-HARDENING.md) — Dedicated security hardening (primary phase)
 - [Phase 5: Operations](../framework/PHASE-5-OPERATIONS.md) — Security monitoring and incident response
 - [Phase 6: Evolution](../framework/PHASE-6-EVOLUTION.md) — Security retrospective and improvement
+
+### AI-Specific Attack Surfaces
+
+AI-assisted development introduces attack surfaces not covered by traditional OWASP categories. Address these throughout the lifecycle:
+
+| Attack Surface | Risk | Mitigation | Phase Focus |
+|---|---|---|---|
+| Prompt injection via context files | Malicious instructions in CLAUDE.md or AGENTS.md could cause AI to generate vulnerable code | Verify context file integrity. Review context file changes in PRs. Use checksums for bootstrapped templates. | Phase 0, Phase 3 |
+| Model output trust | AI-generated code may contain subtle logic errors, security flaws, or hallucinated patterns | Never treat AI output as reviewed. Apply tiered verification by risk tier. Cross-validate critical security findings. | Phase 3, Phase 4 |
+| AI reviewer reliability | AI security reviewers may miss real findings or produce false positives/negatives | Use multiple models for high-risk reviews. Manually verify all Critical findings. Never use AI review as the sole security gate. | Phase 4 |
+| Context file supply chain | Bootstrapped templates from untrusted sources could inject malicious AI instructions | Verify template source integrity. Use checksums. Only bootstrap from trusted, version-controlled sources. | Phase 0 |
+| Training data leakage | AI may reproduce memorized sensitive patterns (API keys, internal URLs) from training data | Review AI output for leaked patterns. Use secret scanning on all generated code. | Phase 3 |
+
+> **Reference:** See [NIST AI 600-1](https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf) (Generative AI Profile) and [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/) for comprehensive AI-specific security guidance.
+
+---
 
 ### Related Pillars
 

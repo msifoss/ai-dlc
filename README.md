@@ -25,7 +25,7 @@ AI-DLC fixes this. It's built from real production experience — not theory —
 
 ```bash
 # 1. Clone the framework
-git clone https://github.com/your-org/ai-dlc.git
+git clone https://github.com/msifoss/ai-dlc.git
 
 # 2. Bootstrap a new project
 cd your-project

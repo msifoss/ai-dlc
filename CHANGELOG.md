@@ -96,5 +96,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - docs/decisions/ADR-001 through ADR-003 — architecture decision records
 - docs/captains_log/ — captain's log and retrospective for v1.1.0 meld
 
-[1.1.0]: https://github.com/your-org/ai-dlc/releases/tag/v1.1.0
-[1.0.0]: https://github.com/your-org/ai-dlc/releases/tag/v1.0.0
+[1.1.0]: https://github.com/msifoss/ai-dlc/releases/tag/v1.1.0
+[1.0.0]: https://github.com/msifoss/ai-dlc/releases/tag/v1.0.0

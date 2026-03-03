@@ -87,6 +87,15 @@ Each phase guide follows this structure:
 - Phase guides must be actionable without external dependencies
 - Framework must pass its own dlc-audit assessment
 
+## Review Cadence
+
+- **Per-release:** Run `/dlc-audit` before tagging any version
+- **Quarterly:** Full `/dlc-audit` + `/five-persona-review` on dimensions scoring below 7/10
+- **CLAUDE.md accuracy audit:** Quarterly — verify repo structure, terminology, and conventions still match reality
+- **Drift detection:** Check for stale dates, expired examples, and outdated references in code samples
+- **Last review:** 2026-03-03 (D5 Security reviewed, 19 findings, 14 fixed)
+- **Next review due:** 2026-06-03 (Q2)
+
 ## Contributing
 
 1. Read this context file first

@@ -465,9 +465,9 @@ During [Phase 4: Hardening](../framework/PHASE-4-HARDENING.md), instruct the AI 
 
 1. **Attacker** — How would I exploit this system?
 2. **Auditor** — Does this meet compliance requirements?
-3. **Architect** — Are there structural security weaknesses?
-4. **User** — Can I accidentally expose my own data?
-5. **Operator** — Can I detect and respond to a breach?
+3. **Ops Engineer** — Can I detect and respond to a breach? Are there production failure modes?
+4. **Cost Analyst** — Can resources be abused? Are there runaway cost scenarios?
+5. **End User** — Can I accidentally expose my own data? Does this violate user trust?
 
 The human reviews all five perspectives and decides which findings to address. Record the review and its outcomes in the captain's log.
 

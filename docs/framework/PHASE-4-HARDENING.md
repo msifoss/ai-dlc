@@ -166,7 +166,7 @@ Score your system against 47 items across 8 categories. Each item scores 0 (not 
 | # | Item | Score |
 |---|------|-------|
 | 37 | IAM roles follow least-privilege principle | /2 |
-| 38 | Secrets stored in secrets manager (not environment variables) | /2 |
+| 38 | Secrets managed by a secrets manager (if injected via env vars, ensure values are never committed to source or visible in logs) | /2 |
 | 39 | Encryption at rest enabled on all data stores | /2 |
 | 40 | Encryption in transit (TLS 1.2+) on all connections | /2 |
 | 41 | SRI hashes on frontend static assets | /2 |
@@ -208,7 +208,7 @@ Establish a baseline before setting thresholds.
 ```bash
 # AWS example: Get last 30 days of cost by service
 aws ce get-cost-and-usage \
-  --time-period Start=2024-01-01,End=2024-01-31 \
+  --time-period Start=$(date -d '30 days ago' +%Y-%m-%d),End=$(date +%Y-%m-%d) \  # Adjust dates for your billing period
   --granularity DAILY \
   --metrics BlendedCost \
   --group-by Type=DIMENSION,Key=SERVICE
@@ -276,11 +276,15 @@ def cost_kill_switch(event, context):
 
     # Notify team
     sns_client = boto3.client('sns')
+    # Notify team — update ARN with your account and topic
     sns_client.publish(
-        TopicArn='arn:aws:sns:us-east-1:123456789:cost-alerts',
+        TopicArn='arn:aws:sns:us-east-1:YOUR_ACCOUNT_ID:cost-alerts',  # TODO: Replace with your SNS topic ARN
         Subject='COST KILL SWITCH ACTIVATED',
         Message=f'Daily spend exceeded threshold. Non-critical functions disabled.'
     )
+    # NOTE: Document a re-enable procedure in your runbook.
+    # The kill switch disables functions but provides no automatic recovery.
+    # See your ops runbook for the re-enable checklist.
 ```
 
 #### Cross-Reference
@@ -360,7 +364,7 @@ def retry_with_backoff(func, max_retries=5, base_delay=1.0):
     for attempt in range(max_retries):
         try:
             return func()
-        except TransientError as e:
+        except (ConnectionError, TimeoutError) as e:  # Replace with your app's transient exceptions
             if attempt == max_retries - 1:
                 raise  # Final attempt failed — propagate error
             delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
@@ -373,6 +377,9 @@ Protect services from cascading failures:
 
 ```python
 class CircuitBreaker:
+    """Simple circuit breaker. Note: not thread-safe as written.
+    For concurrent environments, add threading.Lock() or use a
+    production library like pybreaker or circuitbreaker."""
     def __init__(self, failure_threshold=5, recovery_timeout=60):
         self.failure_count = 0
         self.failure_threshold = failure_threshold
@@ -524,7 +531,7 @@ ignore:
   SNYK-PYTHON-REQUESTS-5595532:
     - '*':
         reason: 'Low severity, no exposure in our usage pattern'
-        expires: '2025-03-01'  # Re-evaluate before this date
+        expires: '2026-09-01'  # TODO: Set to 90 days from today. Re-evaluate before this date.
 ```
 
 | Severity | Policy |
@@ -669,7 +676,7 @@ Before advancing to [Phase 5: Operations](PHASE-5-OPERATIONS.md), verify:
 - [ ] Encryption at rest and in transit verified
 - [ ] IAM least-privilege audit complete
 - [ ] SRI hashes on frontend assets
-- [ ] Secrets stored in secrets manager (not code or environment variables)
+- [ ] Secrets managed by a secrets manager (never committed to source or visible in logs)
 - [ ] Security policy ([SECURITY.md](../../templates/SECURITY.md)) updated with hardening findings
 
 ### Quality Pillar

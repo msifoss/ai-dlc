@@ -20,7 +20,14 @@ If you discover a security issue with the framework's guidance or bootstrap scri
 
 | Date | Scope | Reviewer | Findings | Status |
 |------|-------|----------|----------|--------|
+| 2026-03-03 | Five-persona review of security guidance | AI-assisted (5 personas) | 19 findings (14 fixed, 4 deferred, 1 accepted) | Complete |
 | 2026-02-17 | Initial content review (v1.1.0) | Framework self-assessment | See below | Complete |
+
+### 2026-03-03 Five-Persona Security Guidance Review
+
+Full review: [`docs/reviews/20260303-five-persona-security-guidance-review.md`](docs/reviews/20260303-five-persona-security-guidance-review.md)
+
+19 findings across 5 personas (Attacker, Auditor, Ops Engineer, Cost Analyst, End User). 14 fixed same-day. 4 deferred to next release (ATK-003, AUD-005, COST-001, USR-003). Key fixes: init.sh source integrity verification (ATK-001 Critical), unified severity taxonomy, AI-specific attack surfaces added to PILLAR-SECURITY.md.
 
 ### v1.1.0 Content Review Findings
 
@@ -41,7 +48,8 @@ If you discover a security issue with the framework's guidance or bootstrap scri
 - **No secrets** — This repository contains no API keys, credentials, or tokens
 - **No dependencies** — No package manager, no transitive dependency risk
 - **No runtime** — No code execution, no injection surface
-- **Review cadence** — Content accuracy reviewed at each version release
+- **Review cadence** — Content accuracy reviewed at each version release and quarterly via `/dlc-audit` + `/five-persona-review`
+- **Quarterly schedule** — Next review due 2026-06-03 (Q2). Run `/dlc-audit` for 9-dimension scoring, then `/five-persona-review` on any dimension scoring below 7/10
 - **Template safety** — All templates use TODO markers to prevent accidental use of placeholder content
 
 ## Supported Versions

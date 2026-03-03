@@ -32,17 +32,17 @@ The assessment evaluates nine dimensions that span the entire AI-DLC lifecycle. 
 
 ### Dimension 1: Foundation & Context (Phase 0)
 
-**What it measures:** Project bootstrap quality, context file completeness, governance setup, and repository structure.
+**What it measures:** Project bootstrap quality, context file completeness, governance setup, repository structure, and codebase health readiness for AI-assisted development.
 
 | Score | Criteria |
 |-------|----------|
 | 0-2 | No context file, or a generic/boilerplate context file. No governance model documented. Repository has no consistent structure. |
 | 3-4 | Context file exists but is incomplete (missing conventions, terminology, or architecture). Governance model mentioned but not detailed. Basic repo structure. |
 | 5-6 | Context file covers project identity, structure, and conventions. Governance model selected and documented. Repo structure is consistent. Linting configured. |
-| 7-8 | Context file is comprehensive, specific, and actionable. Pre-commit hooks installed with secret scanning. CI pipeline runs lint, test, and security jobs. PM framework initialized. |
-| 9-10 | Context file is a living document updated regularly. All 14 templates initialized. CI/CD skeleton passes. Context file enables a new developer (or AI session) to orient in under 5 minutes. Governance model has been reviewed and is appropriate for the team. |
+| 7-8 | Context file is comprehensive, specific, and actionable. Pre-commit hooks installed with secret scanning. CI pipeline runs lint, test, and security jobs. PM framework initialized. For existing codebases: codebase health baseline documented (test coverage, lint status, known vulnerabilities). |
+| 9-10 | Context file is a living document updated regularly. All 14 templates initialized. CI/CD skeleton passes. Context file enables a new developer (or AI session) to orient in under 5 minutes. Governance model has been reviewed and is appropriate for the team. Codebase health assessment complete — technical debt documented, dependency vulnerabilities at zero critical, lint passing clean. |
 
-**Key artifacts:** CLAUDE.md, README.md, .gitignore, .pre-commit-config.yaml, CI pipeline, PM-FRAMEWORK.md
+**Key artifacts:** CLAUDE.md, README.md, .gitignore, .pre-commit-config.yaml, CI pipeline, PM-FRAMEWORK.md, codebase health baseline
 
 ### Dimension 2: Requirements & Architecture (Phase 1)
 
@@ -74,17 +74,17 @@ The assessment evaluates nine dimensions that span the entire AI-DLC lifecycle. 
 
 ### Dimension 4: Construction Process (Phase 3)
 
-**What it measures:** Bolt discipline, test-paired development, captain's log practice, and code quality.
+**What it measures:** Bolt discipline, test-paired development, captain's log practice, code quality, and AI-generated code verification.
 
 | Score | Criteria |
 |-------|----------|
 | 0-2 | No bolt structure. Tests are absent or afterthought. No captain's logs. Code quality is inconsistent. |
 | 3-4 | Some bolt structure but inconsistent. Tests exist for some features. Captain's logs written sporadically. |
 | 5-6 | Consistent bolt workflow (plan, execute, review, retro). Tests paired with code for most bolts. Captain's logs written for most bolts. Commit messages follow conventions. |
-| 7-8 | Every bolt has a captain's log. Test delta is positive for every sprint. Bolt metrics tracked (commits, lines, tests, time). T-shirt sizing used and calibrated. Traceability matrix updated per bolt. |
-| 9-10 | Bolt discipline is exemplary: clear scope, accurate estimation, paired tests, retro insights captured. Test coverage exceeds 80%. Commit messages reference requirement IDs. Context file updated during construction. Zero XL bolts (all split during planning). Multi-agent execution model applied where appropriate (specialized agents for review, research, documentation). The Ascent verification loop consistently followed — every bolt verified against all acceptance criteria before completion. |
+| 7-8 | Every bolt has a captain's log. Test delta is positive for every sprint. Bolt metrics tracked (commits, lines, tests, time). T-shirt sizing used and calibrated. Traceability matrix updated per bolt. AI-generated code is identifiable (Co-Authored-By trailers, commit conventions, or metadata). |
+| 9-10 | Bolt discipline is exemplary: clear scope, accurate estimation, paired tests, retro insights captured. Test coverage exceeds 80%. Commit messages reference requirement IDs. Context file updated during construction. Zero XL bolts (all split during planning). Multi-agent execution model applied where appropriate (specialized agents for review, research, documentation). The Ascent verification loop consistently followed — every bolt verified against all acceptance criteria before completion. Tiered verification policy in place: critical paths get full human review, standard code gets AI-assisted review, low-risk changes use automated checks. Review bandwidth allocated by risk tier. |
 
-**Key artifacts:** Captain's logs, bolt metrics, test suite, traceability matrix updates, commit history
+**Key artifacts:** Captain's logs, bolt metrics, test suite, traceability matrix updates, commit history, AI provenance tags
 
 ### Dimension 5: Security Posture (Security Pillar)
 
@@ -144,17 +144,17 @@ The assessment evaluates nine dimensions that span the entire AI-DLC lifecycle. 
 
 ### Dimension 9: Human-AI Collaboration Quality (Cross-cutting)
 
-**What it measures:** Whether humans are steering development decisions or just accepting AI output. The quality of the partnership between human judgment and AI capability.
+**What it measures:** Whether humans are steering development decisions or just accepting AI output. The quality of the partnership between human judgment and AI capability. Whether review ceremony scales with both trust level AND task complexity.
 
 | Score | Criteria |
 |-------|----------|
 | 0-2 | No evidence of human decision-making in the development process. AI appears to be running on autopilot. No captain's logs or decision records. |
 | 3-4 | Some human decisions visible but sparse. Most logs read like AI-generated output. Deploys appear automated without human review. Security findings lack human triage. |
 | 5-6 | Human decisions visible in some logs. Security reviews have human-assigned dispositions. Deploys are human-initiated. Some architecture choices show human judgment. Five Questions Pattern used occasionally. |
-| 7-8 | Captain's logs clearly show human voice and decision-making. Security findings human-triaged with rationale. Deploy approval gates in place. Five Questions Pattern used consistently. Architecture decisions include human rationale and rejected alternatives. |
-| 9-10 | Exemplary human-AI partnership. Logs show clear division of labor. Human overrides documented with rationale. AI suggestions rejected when appropriate. Human owns scope, priorities, and final approval. Evidence of the human teaching the AI through context file improvements. Five Questions Pattern is second nature. Trust-adaptive gates implemented — ceremony scales with track record while risk tiers enforce full review on critical work. The Learning Paradox embraced: human invests in training the system, not reviewing every output. |
+| 7-8 | Captain's logs clearly show human voice and decision-making. Security findings human-triaged with rationale. Deploy approval gates in place. Five Questions Pattern used consistently. Architecture decisions include human rationale and rejected alternatives. Review ceremony scales with trust level. |
+| 9-10 | Exemplary human-AI partnership. Logs show clear division of labor. Human overrides documented with rationale. AI suggestions rejected when appropriate. Human owns scope, priorities, and final approval. Evidence of the human teaching the AI through context file improvements. Five Questions Pattern is second nature. Trust-adaptive gates implemented with ceremony scaling across BOTH trust level and task complexity — high-complexity or novel-domain bolts trigger elevated oversight regardless of trust level. The Learning Paradox embraced: human invests in training the system, not reviewing every output. |
 
-**Key artifacts:** Captain's logs with human voice, security finding dispositions, deploy approval records, Five Questions logs, architecture decision rationale
+**Key artifacts:** Captain's logs with human voice, security finding dispositions, deploy approval records, Five Questions logs, architecture decision rationale, complexity-aware gate decisions
 
 ---
 
@@ -307,3 +307,27 @@ Schedule a re-audit after completing the improvement actions. Recommended cadenc
 - [Bolt Metrics Guide](BOLT-METRICS-GUIDE.md) — Dimension 4 metrics
 - [Glossary](GLOSSARY.md) — Key terms
 - [Autonomous Execution Guide](AUTONOMOUS-EXECUTION-GUIDE.md) — Execution model and trust-adaptive gates
+- [Framework Review — March 2026](FRAMEWORK-REVIEW-2026-03.md) — Industry benchmarking and gap analysis
+
+---
+
+## EU AI Act Compliance Mapping
+
+The `/dlc-audit compliance` action maps the 9 dimension scores to EU AI Act requirements, enabling teams to use their AI-DLC audit as evidence toward regulatory compliance.
+
+| EU AI Act Requirement | Article(s) | AI-DLC Dimension(s) |
+|-----------------------|-----------|---------------------|
+| Risk management system | Art. 9 | D2 (Requirements), D9 (Human-AI Collaboration) |
+| Data governance | Art. 10 | D3 (Specification) |
+| Technical documentation | Art. 11 | D1 (Foundation), D3 (Specification) |
+| Record-keeping / Logging | Art. 12 | D4 (Construction), D8 (Evolution) |
+| Transparency | Art. 13 | D4 (Construction), D9 (Human-AI Collaboration) |
+| Human oversight | Art. 14 | D9 (Human-AI Collaboration) |
+| Accuracy, robustness, cybersecurity | Art. 15 | D5 (Security), D6 (Ops Readiness) |
+| Quality management system | Art. 17 | D1 (Foundation), D4 (Construction) |
+| Post-market monitoring | Art. 72 | D6 (Ops Readiness), D8 (Evolution) |
+| Corrective actions | Art. 20 | D5 (Security), D8 (Evolution) |
+
+**Compliance threshold:** Dimensions scoring >= 6 indicate coverage for the mapped requirement. Dimensions scoring 4-5 indicate partial coverage (gap). Dimensions scoring 0-3 indicate significant compliance risk.
+
+**Note:** AI-DLC compliance is evidence toward EU AI Act compliance, not a guarantee. Full compliance requires organizational-level measures. See [ISO/IEC 42001](https://www.iso.org/standard/42001) for the recommended formal compliance pathway.

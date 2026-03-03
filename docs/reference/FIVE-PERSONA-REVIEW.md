@@ -264,6 +264,15 @@ Status:      Open
 
 7. **Track remediation.** Update finding status as fixes are implemented. Verify each fix addresses the root cause, not just the symptom.
 
+### Reviewer Integrity
+
+AI-powered reviews are powerful but not infallible. Apply these safeguards:
+
+- **Cross-validate Critical findings manually.** Never accept a Critical severity finding from AI review alone — verify it exists by inspecting the code yourself.
+- **Use multiple models for high-risk reviews.** For Phase 4 comprehensive reviews on security-critical systems, run the Attacker persona through at least two different AI models and compare findings.
+- **Mark false positives explicitly.** When the AI produces a finding that is factually incorrect, mark it as "False Positive" (not "Won't Fix") with an explanation. Track false positive rates to calibrate review quality.
+- **Never use AI review as the sole security gate.** AI review is a force multiplier, not a replacement for human judgment on security-critical decisions.
+
 ### Prompt Template
 
 Use this template to invoke each persona:
@@ -287,8 +296,10 @@ For each finding, provide:
 - Remediation: Specific fix with code example where applicable
 - Effort: S / M / L
 
-Produce at minimum 5 findings. If the code is exemplary, note what
-it does well and identify defense-in-depth improvements.
+Report all genuine findings. If fewer than 5 issues exist, state
+"No additional findings for this persona" rather than inflating
+severity or manufacturing issues. Quality over quantity — a review
+with 3 real findings is more valuable than 10 hallucinated ones.
 ```
 
 ---
@@ -322,7 +333,7 @@ Every finding uses this structure. No exceptions.
 
 - Two or more High findings in the same component escalate to Critical (systemic weakness).
 - Any finding involving PII, credentials, or payment data has a minimum severity of High.
-- Any finding reintroduced after previous remediation escalates one severity level and requires root cause analysis.
+- Any finding reintroduced after previous verified closure escalates one severity level and requires root cause analysis.
 
 ---
 

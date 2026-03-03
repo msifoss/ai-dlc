@@ -55,6 +55,25 @@ if [ ! -d "$TEMPLATES_DIR" ]; then
     exit 1
 fi
 
+# Source integrity check: verify AI_DLC_ROOT is a git repo with a known remote
+if [ -d "${AI_DLC_ROOT}/.git" ]; then
+    REMOTE_URL=$(git -C "$AI_DLC_ROOT" remote get-url origin 2>/dev/null || echo "")
+    if [ -z "$REMOTE_URL" ]; then
+        warn "AI-DLC source has no git remote configured. Templates are unverified."
+        warn "Ensure $AI_DLC_ROOT is a trusted, unmodified clone of the AI-DLC repository."
+    fi
+    # Check for uncommitted modifications to templates
+    if git -C "$AI_DLC_ROOT" diff --quiet -- templates/ 2>/dev/null; then
+        : # Templates are clean
+    else
+        warn "AI-DLC templates have uncommitted local modifications."
+        warn "Review changes with: git -C $AI_DLC_ROOT diff -- templates/"
+    fi
+else
+    warn "AI-DLC source ($AI_DLC_ROOT) is not a git repository."
+    warn "Template integrity cannot be verified. Ensure this is a trusted source."
+fi
+
 if [ ! -d ".git" ]; then
     warn "No git repository detected. Initializing..."
     git init
@@ -66,7 +85,7 @@ fi
 echo ""
 echo -e "${BLUE}╔══════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║         AI-DLC Project Bootstrap         ║${NC}"
-echo -e "${BLUE}║     AI Development Life Cycle v1.0.0     ║${NC}"
+echo -e "${BLUE}║     AI Development Life Cycle v1.1.0     ║${NC}"
 echo -e "${BLUE}╚══════════════════════════════════════════╝${NC}"
 echo ""
 info "Target directory: $TARGET_DIR"
@@ -123,9 +142,12 @@ copy_template "$TEMPLATES_DIR/USER-STORIES.md" "docs/USER-STORIES.md"
 # Solo AI workflow (most common starting point)
 copy_template "$TEMPLATES_DIR/SOLO-AI-WORKFLOW-GUIDE.md" "docs/SOLO-AI-WORKFLOW-GUIDE.md"
 
+# Security review protocol (procedural guide for conducting reviews)
+copy_template "$TEMPLATES_DIR/SECURITY-REVIEW-PROTOCOL.md" "docs/SECURITY-REVIEW-PROTOCOL.md"
+
 if [ "$MODE" = "default" ] || [ "$MODE" = "" ]; then
     echo ""
-    success "Default bootstrap complete! (7 documents)"
+    success "Default bootstrap complete! (8 documents)"
     info "Next steps:"
     info "  1. Edit CLAUDE.md with your project details"
     info "  2. Review docs/REQUIREMENTS.md and add your requirements"
@@ -144,7 +166,6 @@ if [ "$MODE" = "--full" ]; then
     copy_template "$TEMPLATES_DIR/MULTI-DEVELOPER-GUIDE.md" "docs/MULTI-DEVELOPER-GUIDE.md"
     copy_template "$TEMPLATES_DIR/INFRASTRUCTURE-PLAYBOOK.md" "docs/INFRASTRUCTURE-PLAYBOOK.md"
     copy_template "$TEMPLATES_DIR/COST-MANAGEMENT-GUIDE.md" "docs/COST-MANAGEMENT-GUIDE.md"
-    copy_template "$TEMPLATES_DIR/SECURITY-REVIEW-PROTOCOL.md" "docs/SECURITY-REVIEW-PROTOCOL.md"
     copy_template "$TEMPLATES_DIR/OPS-READINESS-CHECKLIST.md" "docs/OPS-READINESS-CHECKLIST.md"
     copy_template "$TEMPLATES_DIR/AI-DLC-CASE-STUDY.md" "docs/AI-DLC-CASE-STUDY.md"
 

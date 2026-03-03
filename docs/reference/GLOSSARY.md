@@ -126,7 +126,7 @@ The structured process of removing features, components, or infrastructure from 
 
 ### DLC-Audit
 
-An 8-dimension assessment that measures how well a project follows the AI-DLC framework. Scores each dimension 0-10 and produces an overall maturity rating (Foundational, Developing, Operational, Optimized, Exemplary).
+A 9-dimension assessment that measures how well a project follows the AI-DLC framework. Scores each dimension 0-10 and produces an overall maturity rating (Foundational, Developing, Operational, Optimized, Exemplary). The nine dimensions cover Foundation & Context, Requirements & Architecture, Specification & Elaboration, Construction Process, Security Posture, Operational Readiness, Cost Management, Evolution & Learning, and Human-AI Collaboration Quality.
 
 **Related:** [Audit Scoring](AUDIT-SCORING.md)
 
