@@ -10,11 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Chapter 1 narrative history of the AI-DLC project (`docs/reference/CHAPTER-1.md`)
 - Framework self-compliance artifacts (REQUIREMENTS, TRACEABILITY-MATRIX, USER-STORIES)
+- GitHub Actions CI pipeline: markdown lint, link checking (lychee), secret scanning (gitleaks)
+- Branch protection on main (1 approver required, force push disabled)
+- Full 9-category security audit (`docs/security/20260306-212355-security-audit.txt`)
 
 ### Changed
 - Five-persona security guidance review: 19 findings, 14 fixed, 4 deferred, 1 accepted
 - Five-persona custom skills review: 71 findings across 6 skills, all 71 resolved
 - Retrospective action items 1-4 marked complete
+- init.sh hardened: MODE allowlist validation, remote URL verification, dynamic version banner
+- CLAUDE.md repo structure updated to reflect all current directories
 
 ## [1.1.0] - 2026-02-17
 

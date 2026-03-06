@@ -1,0 +1,114 @@
+================================================================================
+CAPTAIN'S LOG: security-hardening-and-chapter2
+Date: 2026-03-06 15:42:54
+Previous Log: 2026-03-03-framework-review-and-hardening.md
+================================================================================
+
+## Summary
+Session focused on tightening the framework after the March 3rd review cycle.
+Ran /motherhen, fixed release hygiene gaps (tags, changelog, README metrics),
+ran a full /security-audit (9 categories, 5 findings), fixed all 5, enabled
+CI and branch protection, ran /motherhen again, updated CLAUDE.md structure,
+then wrote Chapter 2 of the project narrative.
+
+## Current State
+- Branch: fix/security-audit-findings (PR #1 open against main)
+- Branch protection active on main (1 reviewer required)
+- CI pipeline deployed (.github/workflows/ci.yml)
+- All security findings resolved (90 from Mar 3 + 5 from today = 95 total)
+- Chapter 2 written, covering the March 3-6 hardening cycle
+- 4 deferred findings from Mar 3 still tracked for v1.2.0
+
+## Work Completed
+- Ran /motherhen health check #1: 2 PASS, 3 WARN, 0 FAIL
+  - Fixed WARN items: created git tags (v1.0.0, v1.1.0), added [Unreleased]
+    to CHANGELOG, clarified README metrics as CallHero reference numbers
+  - Committed and pushed (0f2f864)
+- Ran /security-audit: full 9-category audit
+  - 5 findings: 0 Critical, 0 High, 3 Medium, 2 Low
+  - M1: init.sh MODE not validated against allowlist
+  - M2: init.sh source integrity check doesn't verify remote URL value
+  - M3: No CI/CD pipeline for automated scanning
+  - L1: No branch protection on main
+  - L2: Hardcoded version in init.sh banner
+  - Report saved: docs/security/20260306-212355-security-audit.txt
+  - Committed (a929d58), pushed to main
+- Fixed all 5 audit findings:
+  - init.sh: case allowlist, remote URL regex, git describe for version
+  - Created .github/workflows/ci.yml (markdownlint, lychee, gitleaks)
+  - Enabled branch protection via GitHub API
+  - Committed to branch fix/security-audit-findings (1890065)
+  - Created PR #1: https://github.com/msifoss/ai-dlc/pull/1
+- Ran /motherhen health check #2: 1 PASS, 4 WARN, 0 FAIL
+  - Fixed WARN items: updated CLAUDE.md repo structure (added 5 dirs),
+    updated CHANGELOG [Unreleased] with security audit and init.sh hardening
+  - Committed (99c3400)
+- Wrote docs/story/chapter2.md — "Sharpening the Blade"
+  - 204 lines covering industry benchmark, five-persona reviews (90 findings),
+    security audit, CI pipeline, and the tightening spiral pattern
+  - Committed (a46cee8)
+
+## Decisions Made
+- Decision: Create git tags retroactively on existing commits
+  Rationale: v1.0.0 and v1.1.0 were documented in CHANGELOG but never tagged.
+  Tags enable git describe, release tracking, and init.sh dynamic versioning.
+
+- Decision: Push security audit to main before enabling branch protection
+  Rationale: The audit report needed to exist before the PR that fixes its
+  findings. Pushing to main first, then enabling protection, ensures the
+  audit is on record and the fix PR demonstrates the new workflow.
+
+- Decision: Use lychee instead of markdown-link-check for CI
+  Rationale: Lychee is faster, actively maintained, and handles concurrent
+  checking. Excludes example.com and localhost patterns to avoid false positives.
+
+- Decision: Set enforce_admins=false on branch protection
+  Rationale: Solo maintainer needs the ability to merge without a second
+  reviewer in urgent situations. The protection is a guardrail against
+  accidental direct pushes, not a hard compliance gate.
+
+- Decision: Chapter 2 narrative style matches Chapter 1 exactly
+  Rationale: User explicitly requested same writing style. Third-person
+  narrative, specific commit hashes, concrete numbers, honest about gaps,
+  forward-looking closing.
+
+## Issues Encountered
+- Branch protection API call failed on first attempt (HTTP 422)
+  Resolution: The gh CLI -f flag passes strings, not booleans. Switched to
+  --input with a JSON heredoc for correct type handling.
+
+- After enabling branch protection, subsequent commits couldn't push to main
+  Resolution: Expected behavior. Created fix/security-audit-findings branch
+  and PR #1. This is the new workflow working as designed.
+
+## Commits Made
+- 0f2f864: Fix motherhen findings: add [Unreleased] changelog, clarify README metrics, tag releases
+- a929d58: Add full security audit: 5 findings (0 Critical, 3 Medium, 2 Low)
+- 1890065: Fix all 5 security audit findings
+- 99c3400: Fix motherhen WARN items: update repo structure and changelog
+- a46cee8: Add Chapter 2: Sharpening the Blade
+
+## Mistakes & Lessons
+- Lesson: Push audit reports before enabling the protection that prevents
+  direct pushes. Sequencing matters when the fix changes the workflow.
+
+- Lesson: The motherhen → fix → motherhen cycle is effective but generates
+  its own unreleased changes that the second motherhen will flag. Accept
+  this as a natural consequence of the tightening spiral — each pass
+  creates small documentation updates that the next pass validates.
+
+- Lesson: Branch protection with enforce_admins=false is a pragmatic choice
+  for solo maintainers. Full enforcement requires a second reviewer, which
+  a solo project doesn't have. The protection still prevents accidental
+  force-pushes and direct commits from CI or scripts.
+
+## Next Steps
+- Merge PR #1 (requires approval — self-review or adjust protection rules)
+- Tag v1.1.1 after merge (captures all post-v1.1.0 hardening work)
+- Track 4 deferred findings for v1.2.0: ATK-003, AUD-005, COST-001, USR-003
+- Monitor CI pipeline on first PR run (verify markdownlint, lychee, gitleaks)
+- Next quarterly review due 2026-06-03
+
+================================================================================
+END OF LOG
+================================================================================
