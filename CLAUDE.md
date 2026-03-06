@@ -25,7 +25,7 @@ ai-dlc/
 │   ├── framework/               # 7 phase guides (PHASE-0 through PHASE-6)
 │   ├── pillars/                 # 4 cross-cutting concerns
 │   ├── governance/              # 3 team models (solo, small, enterprise)
-│   ├── reference/               # 6 reference documents
+│   ├── reference/               # 7 reference documents
 │   ├── decisions/               # Architecture decision records (ADRs)
 │   ├── captains_log/            # Session decision logs
 │   ├── reviews/                 # Five-persona review archives
@@ -100,7 +100,7 @@ Each phase guide follows this structure:
 - **Quarterly:** Full `/dlc-audit` + `/five-persona-review` on dimensions scoring below 7/10
 - **CLAUDE.md accuracy audit:** Quarterly — verify repo structure, terminology, and conventions still match reality
 - **Drift detection:** Check for stale dates, expired examples, and outdated references in code samples
-- **Last review:** 2026-03-03 (D5 Security reviewed, 19 findings, 14 fixed)
+- **Last review:** 2026-03-06 (five-persona code review, 52 findings, 7 High fixed; 9-category security audit, 5 findings, all fixed)
 - **Next review due:** 2026-06-03 (Q2)
 
 ## Contributing

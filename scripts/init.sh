@@ -7,6 +7,9 @@
 #   ../ai-dlc/scripts/init.sh              # Run from your project directory
 #   ../ai-dlc/scripts/init.sh --minimal    # Only essential files
 #   ../ai-dlc/scripts/init.sh --full       # All 14 foundational documents
+#   ../ai-dlc/scripts/init.sh --strict     # Fail on integrity warnings
+#
+# Flags can be combined: ../ai-dlc/scripts/init.sh --full --strict
 #
 # Prerequisites:
 #   - Git initialized in the target project directory
@@ -19,18 +22,24 @@ set -euo pipefail
 AI_DLC_ROOT="${AI_DLC_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 TEMPLATES_DIR="${AI_DLC_ROOT}/templates"
 TARGET_DIR="$(pwd)"
-MODE="${1:-default}"
+MODE="default"
+STRICT=false
+INTEGRITY_WARNINGS=0
 
-# Validate mode argument
-case "$MODE" in
-    default|""|--minimal|--full) ;;
-    *) echo "Error: Unknown mode: $MODE" >&2
-       echo "Usage: $0 [--minimal|--full]" >&2
-       echo "  (no flag)   Default — 8 essential + workflow documents" >&2
-       echo "  --minimal   4 essential documents only" >&2
-       echo "  --full      All 14 foundational documents" >&2
-       exit 1 ;;
-esac
+# Parse arguments
+for arg in "$@"; do
+    case "$arg" in
+        --minimal|--full) MODE="$arg" ;;
+        --strict) STRICT=true ;;
+        *) echo "Error: Unknown argument: $arg" >&2
+           echo "Usage: $0 [--minimal|--full] [--strict]" >&2
+           echo "  (no flag)   Default — 8 essential + workflow documents" >&2
+           echo "  --minimal   4 essential documents only" >&2
+           echo "  --full      All 14 foundational documents" >&2
+           echo "  --strict    Fail on source integrity warnings" >&2
+           exit 1 ;;
+    esac
+done
 
 # --- Colors ---
 
@@ -47,12 +56,21 @@ success() { echo -e "${GREEN}[ai-dlc]${NC} $1"; }
 warn() { echo -e "${YELLOW}[ai-dlc]${NC} $1"; }
 error() { echo -e "${RED}[ai-dlc]${NC} $1" >&2; }
 
+integrity_warn() {
+    warn "$1"
+    INTEGRITY_WARNINGS=$((INTEGRITY_WARNINGS + 1))
+}
+
 copy_template() {
     local src="$1"
     local dest="$2"
     if [ -f "$dest" ]; then
         warn "Skipping $dest (already exists)"
     else
+        if [ ! -f "$src" ]; then
+            error "Template not found: $src"
+            return 1
+        fi
         cp "$src" "$dest"
         success "Created $dest"
     fi
@@ -70,23 +88,30 @@ fi
 if [ -d "${AI_DLC_ROOT}/.git" ]; then
     REMOTE_URL=$(git -C "$AI_DLC_ROOT" remote get-url origin 2>/dev/null || echo "")
     if [ -z "$REMOTE_URL" ]; then
-        warn "AI-DLC source has no git remote configured. Templates are unverified."
-        warn "Ensure $AI_DLC_ROOT is a trusted, unmodified clone of the AI-DLC repository."
+        integrity_warn "AI-DLC source has no git remote configured. Templates are unverified."
+        integrity_warn "Ensure $AI_DLC_ROOT is a trusted, unmodified clone of the AI-DLC repository."
     elif [[ ! "$REMOTE_URL" =~ github\.com[:/]msifoss/ai-dlc ]]; then
-        warn "AI-DLC remote ($REMOTE_URL) does not match the expected source."
-        warn "Expected: github.com/msifoss/ai-dlc"
-        warn "Ensure this is a trusted fork or mirror before proceeding."
+        integrity_warn "AI-DLC remote ($REMOTE_URL) does not match the expected source."
+        integrity_warn "Expected: github.com/msifoss/ai-dlc"
+        integrity_warn "Ensure this is a trusted fork or mirror before proceeding."
     fi
     # Check for uncommitted modifications to templates
     if git -C "$AI_DLC_ROOT" diff --quiet -- templates/ 2>/dev/null; then
         : # Templates are clean
     else
-        warn "AI-DLC templates have uncommitted local modifications."
-        warn "Review changes with: git -C $AI_DLC_ROOT diff -- templates/"
+        integrity_warn "AI-DLC templates have uncommitted local modifications."
+        integrity_warn "Review changes with: git -C $AI_DLC_ROOT diff -- templates/"
     fi
 else
-    warn "AI-DLC source ($AI_DLC_ROOT) is not a git repository."
-    warn "Template integrity cannot be verified. Ensure this is a trusted source."
+    integrity_warn "AI-DLC source ($AI_DLC_ROOT) is not a git repository."
+    integrity_warn "Template integrity cannot be verified. Ensure this is a trusted source."
+fi
+
+# In strict mode, abort if any integrity warnings were raised
+if [ "$STRICT" = true ] && [ "$INTEGRITY_WARNINGS" -gt 0 ]; then
+    error "Strict mode: $INTEGRITY_WARNINGS integrity warning(s) detected. Aborting."
+    error "Fix the warnings above or run without --strict to proceed anyway."
+    exit 1
 fi
 
 if [ ! -d ".git" ]; then
@@ -107,6 +132,9 @@ echo ""
 info "Target directory: $TARGET_DIR"
 info "Templates source: $TEMPLATES_DIR"
 info "Mode: $MODE"
+if [ "$STRICT" = true ]; then
+    info "Strict mode: enabled"
+fi
 echo ""
 
 # --- Create Directory Structure ---
@@ -114,7 +142,7 @@ echo ""
 info "Creating directory structure..."
 
 mkdir -p docs
-mkdir -p captain-logs
+mkdir -p docs/captains_log
 mkdir -p tests
 
 success "Directory structure created."
@@ -161,7 +189,7 @@ copy_template "$TEMPLATES_DIR/SOLO-AI-WORKFLOW-GUIDE.md" "docs/SOLO-AI-WORKFLOW-
 # Security review protocol (procedural guide for conducting reviews)
 copy_template "$TEMPLATES_DIR/SECURITY-REVIEW-PROTOCOL.md" "docs/SECURITY-REVIEW-PROTOCOL.md"
 
-if [ "$MODE" = "default" ] || [ "$MODE" = "" ]; then
+if [ "$MODE" = "default" ]; then
     echo ""
     success "Default bootstrap complete! (8 documents)"
     info "Next steps:"
@@ -199,12 +227,3 @@ if [ "$MODE" = "--full" ]; then
     echo ""
     exit 0
 fi
-
-# --- Unknown Mode ---
-
-error "Unknown mode: $MODE"
-error "Usage: $0 [--minimal|--full]"
-error "  (no flag)   Default — 7 essential + workflow documents"
-error "  --minimal   4 essential documents only"
-error "  --full      All 14 foundational documents"
-exit 1

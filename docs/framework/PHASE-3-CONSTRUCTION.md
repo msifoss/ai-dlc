@@ -473,73 +473,17 @@ test_error
 test_function_works
 ```
 
-### 10. Multi-Agent Execution Model
+### 10. Multi-Agent Execution, The Ascent, and Trust-Adaptive Review
 
-Complex construction work benefits from specialized AI agents. Match the agent's specialization to the task for higher quality and efficiency.
+Construction leverages three key practices from the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md):
 
-#### Agent Taxonomy for Construction
+**Multi-Agent Execution:** Match specialized agents (Builder, Reviewer, Scout, Scribe) to construction tasks. Route by complexity tier — lightweight tasks to fast models, security-sensitive work to the most capable. Delegate when tasks need different specializations, fresh context, or can run in parallel.
 
-| Agent Type | Specialization | When to Use |
-|------------|---------------|-------------|
-| **Builder** | Code implementation and test writing | Default for most bolt work |
-| **Reviewer** | Five-persona review, code analysis | Post-bolt review, security-sensitive changes |
-| **Scout** | Research, debugging, dependency analysis | Blocker investigation, library evaluation |
-| **Scribe** | Documentation, captain's logs | Retro step, runbook generation |
+**The Ascent:** Never declare a bolt complete without verifying against all acceptance criteria. The loop: Implement → Verify → Check Criteria → Fix or Complete. Run the full test suite (not just new tests), check every criterion explicitly, verify no regressions. "Mostly works" is not an exit condition.
 
-#### Smart Model Routing
+**Trust-Adaptive Review:** Review ceremony scales with trust level (0-3) and risk tier. New projects: review every diff. Established projects: review at transitions. Security-critical work (Tier 1): always full ceremony regardless of trust level.
 
-Not every construction task requires the same model capability. Route tasks to the appropriate tier:
-
-| Tier | Task Examples | Routing Guidance |
-|------|---------------|-----------------|
-| **Lightweight** | Boilerplate, formatting, simple refactoring, log writing | Fastest model; minimize cost and latency |
-| **Standard** | Feature implementation, test writing, standard code review | Default for most construction work |
-| **Complex** | Security-sensitive code, complex debugging, architecture-impacting changes | Most capable model; correctness over speed |
-
-#### Mandatory Delegation Rules
-
-Delegate to a specialist agent when:
-
-- The task requires a **different skill profile** (e.g., security review during construction)
-- The task would benefit from a **fresh context window** (long sessions degrade quality)
-- The task is **independent** and can run in parallel with current work
-- A **dedicated review** is needed (reviewer agent for security-sensitive changes)
-
-Handle directly when the task is within the current agent's specialization and requires loaded context.
-
-See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for the complete agent taxonomy and delegation framework.
-
-### 11. The Ascent as Construction Discipline
-
-The Ascent is the persistence loop that ensures every bolt is verified complete before proceeding. It replaces the common "generate and declare done" pattern with a verification cycle.
-
-```
-IMPLEMENT → VERIFY → CHECK CRITERIA → All met? → YES → COMPLETE
-                                         │
-                                         NO → Fix and return to IMPLEMENT
-```
-
-#### Ascent Rules During Construction
-
-1. **Never declare a bolt complete without running the full test suite.** Not just the new tests — all tests.
-2. **Check every acceptance criterion explicitly.** Do not assume passing tests imply all criteria are met.
-3. **Verify no regressions.** Adjacent components may break when new code is added.
-4. **Exit only on verified completion, blocker escalation, or time-box split.** "Mostly works" is not an exit condition.
-
-See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for the complete Ascent pattern.
-
-### 12. Trust-Adaptive Review
-
-Review ceremony scales with earned trust and risk tier. New projects start with full ceremony; mature projects with strong track records earn reduced ceremony for normal-risk work.
-
-| Trust Level | Review Ceremony | Applies When |
-|-------------|----------------|-------------|
-| Level 0 (New) | Every diff reviewed in detail | First 5 bolts of a new project or team |
-| Level 1 (Established) | Review at phase transitions + major decisions | 5+ bolts with consistent quality |
-| Level 2 (Trusted) | Review at phase transitions, spot-check construction | 20+ bolts with minimal rework |
-| Level 3 (Autonomous) | Review at human decision gates only | Extended track record, mature context |
-
-**Risk tier override:** Security-critical work (Tier 1) always receives full ceremony regardless of trust level. See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for trust level definitions and risk tier overrides.
+See the [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md) for complete details on agent taxonomy, smart model routing, Ascent rules, trust levels, and risk tier overrides.
 
 ---
 

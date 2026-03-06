@@ -8,18 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Chapter 1 narrative history of the AI-DLC project (`docs/reference/CHAPTER-1.md`)
+- Chapter 1 narrative history (`docs/story/chapter1.md`)
+- Chapter 2 narrative history (`docs/story/chapter2.md`)
 - Framework self-compliance artifacts (REQUIREMENTS, TRACEABILITY-MATRIX, USER-STORIES)
 - GitHub Actions CI pipeline: markdown lint, link checking (lychee), secret scanning (gitleaks)
 - Branch protection on main (1 approver required, force push disabled)
 - Full 9-category security audit (`docs/security/20260306-212355-security-audit.txt`)
+- Five-persona code review of full repository (`docs/reviews/20260306-five-persona-code-review.txt`): 52 unique findings (0C, 7H, 24M, 21L)
+- Comprehensive References & Sources section in README (40+ entries across 7 categories)
+- SLO/SLI guidance section in Phase 5 Operations
+- Security Scanning stage in CI/CD deployment proposal template
+- Captain's log for March 6 hardening session
 
 ### Changed
 - Five-persona security guidance review: 19 findings, 14 fixed, 4 deferred, 1 accepted
 - Five-persona custom skills review: 71 findings across 6 skills, all 71 resolved
 - Retrospective action items 1-4 marked complete
-- init.sh hardened: MODE allowlist validation, remote URL verification, dynamic version banner
-- CLAUDE.md repo structure updated to reflect all current directories
+- init.sh hardened: MODE allowlist validation, remote URL verification, dynamic version banner, --strict flag, source file validation, argument loop parser, captain-logs directory naming fix
+- CI pipeline: actions pinned to SHA commits, gitleaks replaced with free CLI
+- Phase 3 Construction: consolidated multi-agent/Ascent/trust-adaptive sections into summary with forward references (792→736 lines)
+- CLAUDE.md repo structure and reference count updated
 
 ## [1.1.0] - 2026-02-17
 
@@ -112,5 +120,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - docs/decisions/ADR-001 through ADR-003 — architecture decision records
 - docs/captains_log/ — captain's log and retrospective for v1.1.0 meld
 
+[Unreleased]: https://github.com/msifoss/ai-dlc/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/msifoss/ai-dlc/releases/tag/v1.1.0
 [1.0.0]: https://github.com/msifoss/ai-dlc/releases/tag/v1.0.0

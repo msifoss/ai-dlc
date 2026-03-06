@@ -17,7 +17,7 @@
 ### Pipeline Stages
 
 ```
-validate --> build --> test --> deploy-dev --> approve --> deploy-staging --> approve --> deploy-prod
+validate --> build --> test --> security-scan --> deploy-dev --> approve --> deploy-staging --> approve --> deploy-prod
 ```
 
 | Stage | Trigger | Gate | Timeout |
@@ -25,7 +25,8 @@ validate --> build --> test --> deploy-dev --> approve --> deploy-staging --> ap
 | Validate | Push to any branch | Lint + schema checks pass | 5 min |
 | Build | Validate passes | Artifact produced successfully | 10 min |
 | Test | Build passes | All test suites green, coverage threshold met | 15 min |
-| Deploy Dev | Test passes | Deployment health check passes | 10 min |
+| Security Scan | Test passes | Zero critical/high vulnerabilities | 10 min |
+| Deploy Dev | Security scan passes | Deployment health check passes | 10 min |
 | Approve (Staging) | Dev deploy verified | Manual approval from tech lead | 24 hr |
 | Deploy Staging | Approval granted | Smoke tests + integration tests pass | 15 min |
 | Approve (Prod) | Staging verified | Manual approval from project owner | 48 hr |
@@ -80,6 +81,10 @@ validate --> build --> test --> deploy-dev --> approve --> deploy-staging --> ap
 | Build | Compilation checks | Zero errors |
 | Test | Unit tests | 100% pass, >= 80% coverage |
 | Test | Integration tests | 100% pass |
+| Security Scan | SAST (static analysis) | Zero critical/high findings |
+| Security Scan | Dependency audit | Zero known critical CVEs |
+| Security Scan | Secret scanning | Zero secrets detected |
+| Security Scan | Container scan (if applicable) | Zero critical image vulnerabilities |
 | Deploy Dev | Smoke tests | All critical paths respond 200 |
 | Deploy Staging | End-to-end tests | All user journeys pass |
 | Deploy Staging | Performance tests | p95 latency < 500ms |
@@ -87,9 +92,28 @@ validate --> build --> test --> deploy-dev --> approve --> deploy-staging --> ap
 
 <!-- TODO: Adjust coverage thresholds, latency targets, and error budgets. -->
 
+### Security Scanning Stage
+
+Run security checks after tests pass but before any deployment. These checks gate the pipeline — a critical finding blocks deployment.
+
+<!-- TODO: Select and configure the tools appropriate for your tech stack. -->
+
+| Check | Purpose | Example Tools |
+|---|---|---|
+| SAST (Static Analysis) | Find vulnerabilities in source code | Semgrep, SonarQube, CodeQL |
+| Dependency Audit | Detect known CVEs in dependencies | `npm audit`, `pip-audit`, `govulncheck`, Snyk |
+| Secret Scanning | Prevent secrets from reaching production | Gitleaks, TruffleHog, GitHub secret scanning |
+| Container Scan | Find vulnerabilities in container images | Trivy, Grype, Snyk Container |
+| DAST (Dynamic Analysis) | Test running application for vulnerabilities | OWASP ZAP, Burp Suite (optional, run in staging) |
+
+**Failure policy:**
+- Critical or High findings: **Block pipeline.** Fix before deployment.
+- Medium findings: **Warn.** Track in security backlog. Do not block.
+- Low findings: **Log.** Address when convenient.
+
 ### Test Failure Policy
 
-- **Validate / Build / Test:** Automatic pipeline halt. Fix and re-push.
+- **Validate / Build / Test / Security Scan:** Automatic pipeline halt. Fix and re-push.
 - **Deploy Dev:** Auto-rollback to previous good deployment.
 - **Deploy Staging:** Auto-rollback; require root cause analysis before retry.
 - **Deploy Prod:** Immediate auto-rollback; incident created automatically.
