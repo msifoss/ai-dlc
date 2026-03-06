@@ -458,6 +458,65 @@ Generate a weekly operations report covering system health:
 - [ ] Update canary test for new checkout flow (owner: @qa)
 ```
 
+#### Service Level Objectives (SLOs) and Indicators (SLIs)
+
+Monitoring tells you *what is happening*. SLOs tell you *whether it matters*. Define SLOs before production launch — they determine when to page, when to halt deployments, and when to invest in reliability vs features.
+
+**Step 1: Identify Critical User Journeys**
+
+List the 3-5 user-facing workflows that define your product's value. For each, identify the reliability dimension users care about most:
+
+| Journey | Primary SLI | Measurement |
+|---------|------------|-------------|
+| User login | Availability + Latency | Successful logins / total attempts, p95 response time |
+| Order placement | Availability + Correctness | Successful orders / total attempts, orders matching intent |
+| Dashboard load | Latency | p95 and p99 page load time |
+| Webhook delivery | Completeness | Events delivered / events generated within 60s |
+
+**Step 2: Set SLO Targets**
+
+Set targets that balance reliability with development velocity. Tighter SLOs = more on-call burden = less time for features.
+
+| SLI | Measurement Window | Target | Error Budget |
+|-----|-------------------|--------|-------------|
+| Availability | 30-day rolling | 99.9% | 43 min downtime/month |
+| Latency (p95) | 30-day rolling | < 500ms | 5% of requests may exceed |
+| Latency (p99) | 30-day rolling | < 1000ms | 1% of requests may exceed |
+| Error rate | 30-day rolling | < 0.1% | ~4,300 errors per 4.3M requests |
+
+**Step 3: Implement Error Budgets**
+
+The error budget is the gap between perfect and your SLO target. When the budget is exhausted, shift priority from features to reliability:
+
+| Budget Status | Action |
+|--------------|--------|
+| **> 50% remaining** | Normal development velocity. Ship features. |
+| **25-50% remaining** | Review recent deployments. Increase canary duration. |
+| **< 25% remaining** | Halt non-critical deployments. Focus on reliability. |
+| **Exhausted** | Feature freeze until SLO recovers. Post-mortem required. |
+
+**Step 4: Wire SLOs to Alerts**
+
+SLO-based alerts replace threshold-based noise. Alert on burn rate (how fast you're consuming error budget), not on individual errors:
+
+```yaml
+# Alert when burning error budget 10x faster than sustainable
+- name: slo-availability-fast-burn
+  description: "Availability SLO burning error budget too fast"
+  condition: "error_budget_consumption_rate > 10x over 5 minutes"
+  action: page on-call
+  runbook: runbooks/slo-availability-burn
+
+# Alert when burning 2x — will breach SLO before month ends
+- name: slo-availability-slow-burn
+  description: "Availability SLO will breach before window ends"
+  condition: "error_budget_consumption_rate > 2x over 6 hours"
+  action: notify team channel
+  runbook: runbooks/slo-availability-trending
+```
+
+For more on SLO methodology, see Google's [SRE Workbook: Implementing SLOs](https://sre.google/workbook/implementing-slos/).
+
 ---
 
 ### 5.6 AI-Assisted Observability (The /prodstatus Pattern)

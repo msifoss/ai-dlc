@@ -1,0 +1,710 @@
+================================================================================
+FIVE-PERSONA CODE REVIEW
+Date: 2026-03-06
+Scope: Full AI-DLC repository (59 files, ~17,400 lines)
+================================================================================
+
+## Overview
+
+| # | Persona | Focus Area | Raw Findings |
+|---|---------|------------|--------------|
+| 1 | Staff Engineer | Code quality, error handling, operational readiness | 13 |
+| 2 | First Principles | Over-engineering, unnecessary complexity | 12 |
+| 3 | Radical Transparency | Docs accuracy, operational readiness | 12 |
+| 4 | CTO / Security | Security, architecture | 14 |
+| 5 | SRE / DevOps | Infrastructure, monitoring, CI/CD | 27 |
+| | **Total raw findings** | | **78** |
+
+After deduplication: **52 unique findings**
+
+================================================================================
+## CONSOLIDATED FINDINGS — SORTED BY SEVERITY
+================================================================================
+
+### CRITICAL (0)
+
+(none)
+
+---
+
+### HIGH (7)
+
+**F1 — init.sh dead code: unreachable "Unknown Mode" block (lines 203-210)**
+File: scripts/init.sh:203-210
+Personas: Staff Engineer, First Principles, Radical Transparency, SRE/DevOps
+The MODE allowlist at line 25 exits for unknown modes, making the error block
+at the bottom (lines 203-210) unreachable dead code. This dead code also
+shows a stale document count ("7 essential + workflow documents") that
+contradicts the correct count of 8 in the earlier exit message (line 166).
+Fix: Delete lines 203-210 entirely. The early validation at line 25 handles
+all invalid inputs.
+
+---
+
+**F2 — CI actions pinned by major version tag, not SHA**
+File: .github/workflows/ci.yml:17-18, 29, 44, 47
+Personas: CTO/Security, SRE/DevOps
+All five GitHub Actions (`actions/checkout@v4`, `DavidAnson/markdownlint-cli2-action@v19`,
+`lycheeverse/lychee-action@v2`, `gitleaks/gitleaks-action@v2`) are pinned by
+mutable version tags, not immutable commit SHAs. A compromised upstream action
+could inject malicious code into the CI pipeline. NIST SP 800-218A and the
+StepSecurity hardening guide both recommend SHA pinning for supply chain security.
+Fix: Pin each action to a specific commit SHA with a version comment:
+  `actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.7`
+
+---
+
+**F3 — gitleaks requires paid license; CI will silently degrade**
+File: .github/workflows/ci.yml:48-49
+Personas: Staff Engineer, CTO/Security, SRE/DevOps
+The gitleaks-action@v2 requires a GITLEAKS_LICENSE secret for full
+functionality. Without a license key configured in the repo settings, the
+secret scanning job will either fail or run in a degraded mode without
+clear indication. For an open-source docs-only repo, this creates a false
+sense of security.
+Fix: Either (a) configure the license key in GitHub repo secrets, (b) replace
+with the free `gitleaks` CLI via a direct run step, or (c) switch to
+`trufflesecurity/trufflehog` GitHub Action which is free for OSS. Add a
+comment documenting the licensing requirement.
+
+---
+
+**F4 — init.sh integrity checks are warn-only; no option to fail**
+File: scripts/init.sh:69-90
+Personas: CTO/Security
+The source integrity verification (remote URL check, uncommitted template
+modifications) only issues warnings — it never exits or offers a `--strict`
+mode that would refuse to proceed. A user who clones a malicious fork and
+ignores the warnings still gets poisoned templates copied. The warning-only
+approach was a deliberate decision (documented in the security audit as
+"low risk since only .md files are copied"), but adding a `--strict` flag
+would let security-conscious users enforce verification.
+Fix: Add a `--strict` flag that exits non-zero on any integrity warning.
+Document the flag in usage. Default behavior remains warn-only for
+backward compatibility.
+
+---
+
+**F5 — Phase 3 (Construction) is 792 lines — largest and densest guide**
+File: docs/framework/PHASE-3-CONSTRUCTION.md
+Personas: First Principles
+At 792 lines, Phase 3 is substantially longer than any other phase guide
+(next largest is Phase 5 at 955 lines, but Phase 5 covers operations which
+inherently has more surface area). Phase 3 mixes construction process,
+The Ascent pattern, multi-agent execution, trust-adaptive review, and
+execution mode selection — concepts that are independently complex. A new
+reader encountering all these concepts simultaneously faces high cognitive
+load.
+Fix: Consider extracting "The Ascent" and "Multi-Agent Execution" into
+standalone reference documents (they are already reference concepts, not
+phase-specific), and linking from Phase 3 with summaries.
+
+---
+
+**F6 — No SLO/SLI guidance in Phase 5 Operations**
+File: docs/framework/PHASE-5-OPERATIONS.md
+Personas: SRE/DevOps
+Phase 5 covers deployment, monitoring, and incident response but does not
+define or reference Service Level Objectives (SLOs) or Service Level
+Indicators (SLIs). Without SLO/SLI guidance, consuming projects have
+monitoring without measurable reliability targets. This is a gap compared
+to the AWS Well-Architected Framework's Reliability Pillar and Google's
+SRE handbook.
+Fix: Add an "SLO/SLI Definition" section to Phase 5 covering: how to
+identify critical user journeys, selecting SLIs (availability, latency,
+error rate), setting SLO targets, and error budget policies.
+
+---
+
+**F7 — CI/CD deployment template missing security scanning stages**
+File: templates/CICD-DEPLOYMENT-PROPOSAL.md
+Personas: SRE/DevOps
+The CI/CD deployment proposal template has pipeline stages for build, test,
+and deploy, but does not include stages for SAST, DAST, dependency scanning,
+or container scanning. Given that the Security Pillar and Five-Persona Review
+emphasize security throughout the lifecycle, the CI/CD template should
+demonstrate security scanning as a pipeline stage.
+Fix: Add a "Security Scanning" stage to the pipeline template between test
+and deploy, with placeholder entries for SAST, dependency audit, secret
+scanning, and optional DAST.
+
+---
+
+### MEDIUM (24)
+
+**F8 — CHANGELOG Chapter 1 path is wrong**
+File: CHANGELOG.md:11
+Personas: Radical Transparency, SRE/DevOps
+The CHANGELOG references Chapter 1 at `docs/reference/CHAPTER-1.md` but the
+file actually lives at `docs/story/chapter1.md`. This is a broken internal
+reference that would confuse anyone reading the CHANGELOG.
+Fix: Change path to `docs/story/chapter1.md`.
+
+---
+
+**F9 — CLAUDE.md says "6 reference documents" but 7 exist**
+File: CLAUDE.md:28
+Personas: Radical Transparency, SRE/DevOps
+The repo structure comment says "# 6 reference documents" but the directory
+contains 7 files (the FRAMEWORK-REVIEW-2026-03.md was added post-v1.1.0).
+Fix: Update comment to "# 7 reference documents".
+
+---
+
+**F10 — No shellcheck in CI pipeline**
+File: .github/workflows/ci.yml
+Personas: Staff Engineer, SRE/DevOps
+The CI pipeline lints markdown and scans for secrets but does not lint the
+shell script (`scripts/init.sh`). ShellCheck would catch common bash
+pitfalls (unquoted variables, useless use of cat, etc.) automatically.
+Fix: Add a shellcheck job to ci.yml targeting `scripts/init.sh`.
+
+---
+
+**F11 — CHANGELOG missing [Unreleased] comparison link**
+File: CHANGELOG.md:115-116
+Personas: Staff Engineer, SRE/DevOps
+The CHANGELOG has comparison links for [1.1.0] and [1.0.0] but is missing
+the [Unreleased] comparison link. Per Keep a Changelog format, there
+should be: `[Unreleased]: https://github.com/msifoss/ai-dlc/compare/v1.1.0...HEAD`
+Fix: Add the comparison link after line 116.
+
+---
+
+**F12 — Templates excluded from markdown lint may accumulate errors**
+File: .github/workflows/ci.yml:21-22
+Personas: Staff Engineer, SRE/DevOps
+Template markdown files (`templates/**/*.md`) are excluded from linting.
+While templates intentionally use TODO markers and placeholder syntax that
+might trigger lint rules, a blanket exclusion means formatting errors in
+templates (broken tables, invalid links, inconsistent heading levels) will
+never be caught. Templates are consumed by other projects — their formatting
+quality matters.
+Fix: Lint templates with a relaxed rule set (disable rules for TODO markers
+but keep structural rules), or add a separate lint config for templates.
+
+---
+
+**F13 — SECURITY.md has no contact email for vulnerability reporting**
+File: SECURITY.md:13-15
+Personas: Staff Engineer, Radical Transparency
+The vulnerability reporting section says "Email security concerns to the
+repository maintainers" but does not provide an actual email address. A
+reporter who finds a vulnerability has no concrete way to reach the
+maintainer privately.
+Fix: Add a specific email address or link to a private reporting channel
+(GitHub's built-in private vulnerability reporting, for example).
+
+---
+
+**F14 — init.sh creates "captain-logs" but framework uses "captains_log"**
+File: scripts/init.sh:117
+Personas: Staff Engineer, Radical Transparency
+The bootstrap script creates `captain-logs/` as a directory, but the AI-DLC
+framework itself uses `docs/captains_log/` for its captain's logs. This
+naming inconsistency will confuse consuming projects.
+Fix: Change line 117 to `mkdir -p docs/captains_log` to match the framework's
+own convention, or document the intentional difference if there is one.
+
+---
+
+**F15 — Numerous cross-reference links not verified automatically**
+File: (repo-wide)
+Personas: CTO/Security
+The repository contains 42+ external URLs (verified by lychee in CI) but
+internal cross-references between markdown documents (e.g., `[Phase 3](../framework/PHASE-3-CONSTRUCTION.md)`)
+are not automatically validated. Lychee can check relative links, but the
+CI configuration only checks `**/*.md` without verifying anchors. A renamed
+or deleted document would break cross-references silently.
+Fix: Configure lychee to verify relative links and anchors, or add a
+dedicated cross-reference validation step.
+
+---
+
+**F16 — Olympus terminology not explained until Autonomous Execution Guide**
+File: docs/framework/PHASE-2-ELABORATION.md, docs/framework/PHASE-3-CONSTRUCTION.md
+Personas: First Principles, Radical Transparency
+Terms like "Olympian," "IDEA → INTENT → UNIT → BOLT," "The Ascent," and
+"Momus/Metis gates" appear in phase guides before they are defined in the
+Autonomous Execution Guide. A first-time reader following the phases
+sequentially encounters undefined terminology. The Glossary helps but is
+a separate document.
+Fix: Add brief inline definitions or forward-references (e.g., "The Ascent
+(see [Autonomous Execution Guide](../reference/AUTONOMOUS-EXECUTION-GUIDE.md))")
+when terms first appear.
+
+---
+
+**F17 — Five-Persona Review reference document duplicates skill instructions**
+File: docs/reference/FIVE-PERSONA-REVIEW.md
+Personas: First Principles
+The Five-Persona Review reference document (469 lines) substantially
+overlaps with the `/five-persona-review` skill prompt. Changes to one
+will not propagate to the other. This creates a maintenance burden and
+drift risk.
+Fix: Pick one as the source of truth. Either (a) make the reference doc
+canonical and have the skill reference it, or (b) make the skill canonical
+and have the reference doc be a summary with a pointer. Currently both are
+complete standalone descriptions of the same methodology.
+
+---
+
+**F18 — Audit Scoring dimension grades vs overall grade thresholds misaligned**
+File: docs/reference/AUDIT-SCORING.md
+Personas: Radical Transparency
+Individual dimension grades say A = 9-10, but the overall maturity rating
+says "Exemplary" (equivalent to A) at 8.1-10.0. A project with all 8s
+would get nine B dimensions but an overall A ("Exemplary"). This
+inconsistency was flagged in the March 3 skills review but may not have
+been fixed in the reference document itself.
+Fix: Align the overall maturity thresholds with the per-dimension grade
+bands, or document the intentional distinction (overall is weighted
+differently than individual dimensions).
+
+---
+
+**F19 — Hardening phase template references are not all bidirectional**
+File: docs/framework/PHASE-4-HARDENING.md
+Personas: CTO/Security
+Phase 4 links to templates (OPS-READINESS-CHECKLIST, SECURITY-REVIEW-PROTOCOL)
+but those templates don't consistently link back to Phase 4 as their source
+phase. CLAUDE.md says "Every template links back to the phase that produces
+it" — this convention is not uniformly followed.
+Fix: Audit all 14 templates for back-links to their source phase and add
+any that are missing.
+
+---
+
+**F20 — No Mermaid diagram rendering verification**
+File: (repo-wide)
+Personas: CTO/Security
+Several documents contain Mermaid diagram syntax (flowcharts, sequence
+diagrams) but there is no CI step to verify Mermaid diagrams render
+correctly. Malformed Mermaid syntax would appear as raw text to readers on
+GitHub. Additionally, ATK-003 (deferred from March 3) noted that Mermaid
+diagrams can contain embedded links that could be used for phishing.
+Fix: Add a Mermaid validation step to CI, or at minimum verify Mermaid
+blocks parse without errors.
+
+---
+
+**F21 — AWS Well-Architected Mapping references 6 pillars but doesn't mention Sustainability**
+File: docs/reference/AWS-WELL-ARCHITECTED-MAPPING.md
+Personas: Radical Transparency
+The AWS WAF mapping covers the six original pillars but doesn't mention
+whether the Sustainability pillar (added by AWS in 2021) was intentionally
+excluded or overlooked. For completeness and transparency, the omission
+should be noted.
+Fix: Add a brief note about the Sustainability pillar and its relationship
+(or lack thereof) to AI-DLC.
+
+---
+
+**F22 — Review cadence in CLAUDE.md references "Last review: 2026-03-03" but a review was done 2026-03-06**
+File: CLAUDE.md:103
+Personas: Radical Transparency
+The "Last review" date says 2026-03-03 but the full security audit was
+completed on 2026-03-06. The date is stale.
+Fix: Update to "Last review: 2026-03-06 (D5 Security, 9-category audit,
+5 findings, all fixed)".
+
+---
+
+**F23 — No markdownlint configuration file — default rules may be too strict or too lenient**
+File: (repo-wide)
+Personas: SRE/DevOps
+The CI pipeline uses `DavidAnson/markdownlint-cli2-action@v19` without a
+`.markdownlint.yml` or `.markdownlint-cli2.jsonc` configuration file. This
+means default rules apply, which may flag legitimate patterns (long lines in
+tables, HTML comments in templates) or miss project-specific conventions.
+Fix: Add a `.markdownlint.yml` configuration file with rules tailored to
+AI-DLC's conventions (allow long lines in tables, allow HTML comments,
+enforce consistent heading styles).
+
+---
+
+**F24 — Governance models don't reference each other for migration**
+File: docs/governance/SOLO-AI.md, SMALL-TEAM.md, ENTERPRISE.md
+Personas: First Principles
+The three governance models are standalone documents with no guidance on
+migrating between them. A solo developer who grows to a small team has no
+documented transition path. Each model is 550-640 lines — substantial
+documents that could share a "Migration from [other model]" section.
+Fix: Add a brief "Growing Into [Next Model]" section at the end of SOLO-AI
+and SMALL-TEAM governance docs.
+
+---
+
+**F25 — Copy-paste risk: copy_template doesn't validate source file exists**
+File: scripts/init.sh:50-58
+Personas: CTO/Security
+The `copy_template` function checks if the destination exists (skip if so)
+but doesn't verify the source file exists. If a template is renamed or
+removed from the AI-DLC repo, `cp` will fail with an unhelpful error
+message. With `set -e`, this would abort the script mid-bootstrap, leaving
+a partial setup.
+Fix: Add `[ -f "$src" ] || { error "Template not found: $src"; return 1; }`
+at the start of `copy_template`.
+
+---
+
+**F26 — Phase 5 Operations at 955 lines is the longest document**
+File: docs/framework/PHASE-5-OPERATIONS.md
+Personas: First Principles
+Phase 5 at 955 lines is the longest single document in the repo. While
+operations inherently has more surface area, the document covers deployment,
+monitoring, incident response, runbooks, and the Summit pattern. Some of
+these could be standalone reference documents.
+Fix: Consider extracting runbook templates and the Summit pattern into
+reference documents, keeping Phase 5 focused on the operational process
+flow.
+
+---
+
+**F27 — Self-compliance docs are thin stubs**
+File: docs/REQUIREMENTS.md (41 lines), docs/TRACEABILITY-MATRIX.md (36 lines)
+Personas: Radical Transparency
+The framework's own REQUIREMENTS.md and TRACEABILITY-MATRIX.md are
+significantly shorter than the templates they were derived from (193 and
+161 lines respectively). While the CHANGELOG mentions "23 framework
+requirements (10 FR, 8 NFR, 5 SEC) with IDs and traceability," the actual
+files appear to be stubs rather than full implementations.
+Fix: Flesh out the self-compliance documents to match the quality expected
+of consuming projects, or clearly label them as abbreviated self-assessments
+with a note explaining why a docs-only framework has simpler requirements.
+
+---
+
+**F28 — No contribution guidelines for external contributors**
+File: (repo-wide)
+Personas: Radical Transparency
+CLAUDE.md has a "Contributing" section aimed at AI assistants, but there's
+no CONTRIBUTING.md for human contributors. The project has MIT license and
+a public repo — external contributions are possible.
+Fix: Add a CONTRIBUTING.md with PR guidelines, code of conduct reference,
+and contribution workflow.
+
+---
+
+**F29 — Story chapter files live outside docs/reference/ — inconsistent with other content**
+File: docs/story/chapter1.md, docs/story/chapter2.md
+Personas: SRE/DevOps
+Story chapters use lowercase filenames (`chapter1.md`, `chapter2.md`) while
+every other document in the repo uses ALL-CAPS-KEBAB-CASE naming. The
+CLAUDE.md conventions section says "All caps for document names, kebab-case
+for multi-word names."
+Fix: Either rename to `CHAPTER-1.md` and `CHAPTER-2.md` to match
+conventions, or document the exception in CLAUDE.md.
+
+---
+
+**F30 — Cost Pillar has no concrete AI/LLM cost tracking example**
+File: docs/pillars/PILLAR-COST.md
+Personas: First Principles
+The Cost Awareness Pillar discusses budget tracking, dashboards, and kill
+switches but doesn't include specific guidance for tracking AI/LLM API
+costs (token usage, model selection costs, batch vs real-time pricing).
+Given AI-DLC is specifically about AI-assisted development, the cost pillar
+should address AI tooling costs explicitly.
+Fix: Add an "AI/LLM Cost Tracking" subsection with guidance on token budget
+monitoring, model cost comparison, and cost-per-bolt estimation.
+
+---
+
+**F31 — CHANGELOG "Added" section has Chapter 1 as a non-existent reference doc**
+File: CHANGELOG.md:11
+Personas: Radical Transparency
+CHANGELOG says Chapter 1 was added as "narrative history" at path
+`docs/reference/CHAPTER-1.md`. The actual file is `docs/story/chapter1.md`.
+This makes the CHANGELOG factually incorrect — not just a style issue.
+(Note: This overlaps with F8 but represents the broader issue of the
+Chapter 1 entry being incorrect.)
+Fix: Same as F8 — update the path.
+
+---
+
+### LOW (21)
+
+**F32 — Link check accepts 403 responses**
+File: .github/workflows/ci.yml:36
+Personas: SRE/DevOps
+The lychee link checker is configured with `--accept 200,403,429`. Accepting
+403 (Forbidden) means broken links behind authentication will appear healthy.
+Fix: Remove 403 from the accept list, or add it to an explicit
+`--exclude` pattern for known auth-protected URLs.
+
+---
+
+**F33 — No .editorconfig for consistent formatting**
+File: (repo-wide)
+Personas: SRE/DevOps
+The repo has no `.editorconfig` file to enforce consistent line endings,
+indentation, and trailing whitespace across editors. For a docs-only repo
+consumed by many editors, this helps prevent formatting churn in PRs.
+Fix: Add a basic `.editorconfig` with `charset = utf-8`, `indent_style = space`,
+`indent_size = 2`, `end_of_line = lf`, `trim_trailing_whitespace = true`.
+
+---
+
+**F34 — printf with color variable may fail on some shells**
+File: scripts/init.sh:104
+Personas: Staff Engineer
+`printf "${BLUE}..."` puts ANSI escape sequences in the format string.
+While this works on bash, it's not POSIX-compliant. The script targets
+bash (shebang line: `#!/usr/bin/env bash`) so this is not a bug, but
+mixing `echo -e` (used elsewhere) with `printf` for color output is
+inconsistent.
+Fix: Minor — use `echo -e` consistently or `printf` consistently. Not a
+functional issue given the bash shebang.
+
+---
+
+**F35 — docs/decisions/ has only 3 ADRs — no ADR for v1.1.0 decisions**
+File: docs/decisions/
+Personas: Radical Transparency
+The ADR directory has ADR-001 through ADR-003, all from v1.0.0. The v1.1.0
+Olympus meld introduced significant architectural decisions (trust-adaptive
+gates, multi-agent execution, artifact hierarchy) with no corresponding ADRs.
+Fix: Consider adding ADR-004 for trust-adaptive gates and ADR-005 for
+the IDEA-INTENT-UNIT-BOLT artifact hierarchy.
+
+---
+
+**F36 — Case study template is CallHero-specific in a universal framework**
+File: templates/AI-DLC-CASE-STUDY.md
+Personas: First Principles
+The case study template (368 lines) references CallHero-specific patterns.
+For a universal framework, the template should be generic with CallHero as
+an example in comments.
+Fix: The template already appears mostly generic — verify it doesn't have
+CallHero-hardcoded section names.
+
+---
+
+**F37 — No git tag for v1.2.0 deferred items tracking**
+File: (repo-wide)
+Personas: SRE/DevOps
+Four findings are deferred to v1.2.0 (ATK-003, AUD-005, COST-001, USR-003)
+but there's no milestone, issue, or tracking mechanism besides the text in
+SECURITY.md. If the deferred items are forgotten, they'll silently age out.
+Fix: Create GitHub issues for each deferred item, or add a
+`docs/decisions/DEFERRED-ITEMS.md` tracking document.
+
+---
+
+**F38 — Missing CODEOWNERS file**
+File: (repo-wide)
+Personas: SRE/DevOps
+The repo has branch protection requiring 1 reviewer but no CODEOWNERS file
+to automatically assign reviewers. For a solo-maintainer repo this is
+cosmetic, but it becomes important if contributors join.
+Fix: Add a CODEOWNERS file with `* @msifoss` (or the appropriate handle).
+
+---
+
+**F39 — docs/ directory has no README or index**
+File: docs/
+Personas: Radical Transparency
+The docs/ directory has 7 subdirectories and 3 root-level files but no
+README or index document explaining the directory structure. A new
+contributor navigating on GitHub would see an unlabeled list of directories.
+Fix: Add a brief `docs/README.md` index with one-line descriptions of each
+subdirectory.
+
+---
+
+**F40 — Glossary may be incomplete after v1.1.0**
+File: docs/reference/GLOSSARY.md
+Personas: Radical Transparency
+The Glossary (403 lines) was expanded in v1.1.0 with ~18 new terms but
+may not include terms introduced in post-v1.1.0 work (e.g., "tightening
+spiral," "Mother Hen," "five-persona code review" as distinct from
+"five-persona security review").
+Fix: Review Glossary against current terminology usage and add any new terms.
+
+---
+
+**F41 — SECURITY.md supported versions could be more precise**
+File: SECURITY.md:64-68
+Personas: CTO/Security
+The supported versions table shows 1.1.x and 1.0.x as "Yes" but there's
+only one release of each. The table implies patch releases that don't exist.
+Fix: Minor — update to reflect actual released versions, or note that
+patch releases follow the same support policy.
+
+---
+
+**F42 — No LICENSE reference in README until the very bottom**
+File: README.md:280-282
+Personas: Radical Transparency
+The license (MIT) is only mentioned at the very bottom of README.md with
+a bare link. Given this is a framework consumed by other projects, the
+licensing terms are important context for adoption decisions.
+Fix: Minor — the current placement is standard. Consider adding "MIT
+Licensed" to the subtitle area if desired.
+
+---
+
+**F43 — init.sh creates "tests/" directory that may not be needed**
+File: scripts/init.sh:118
+Personas: First Principles
+The bootstrap script creates an empty `tests/` directory for every project.
+A docs-only project or a project with its own test structure may not need
+this. The framework itself doesn't have a `tests/` directory.
+Fix: Consider making `tests/` creation conditional on the project type,
+or move it to `--full` mode only.
+
+---
+
+**F44 — AWS Well-Architected Mapping may need version update**
+File: docs/reference/AWS-WELL-ARCHITECTED-MAPPING.md
+Personas: Radical Transparency
+The AWS WAF mapping document (254 lines) doesn't indicate which version
+of the WAF it maps against. AWS updates the WAF periodically.
+Fix: Add a version/date reference at the top of the document.
+
+---
+
+**F45 — Phase 6 Evolution "five-phase learning loop" not clearly diagrammed**
+File: docs/framework/PHASE-6-EVOLUTION.md
+Personas: First Principles
+Phase 6 describes a "five-phase learning loop" but the loop stages aren't
+presented as a clear diagram or summary table at the start. The reader has
+to piece together the loop from narrative text.
+Fix: Add a summary table or Mermaid diagram at the top of Phase 6 showing
+the five learning phases.
+
+---
+
+**F46 — Traceability Pillar doesn't address git commit message conventions**
+File: docs/pillars/PILLAR-TRACEABILITY.md
+Personas: SRE/DevOps
+The Traceability Pillar discusses captain's logs and traceability matrices
+but doesn't specify commit message conventions (Conventional Commits,
+bolt references, requirement IDs in commits). Commits are a primary
+traceability artifact.
+Fix: Add a brief "Commit Message Conventions" section or reference one.
+
+---
+
+**F47 — init.sh banner box width is hardcoded at 44 chars**
+File: scripts/init.sh:102-105
+Personas: Staff Engineer
+The ASCII banner box is fixed-width. If the version string exceeds 10
+characters (e.g., "v1.10.0-rc1"), the box alignment will break. The
+`%-10s` format string limits the display width.
+Fix: Minor cosmetic — increase the format width or make it dynamic. Low
+priority since versions are unlikely to exceed 10 chars soon.
+
+---
+
+**F48 — Governance model file names don't follow CLAUDE.md conventions consistently**
+File: docs/governance/SOLO-AI.md, SMALL-TEAM.md, ENTERPRISE.md
+Personas: Radical Transparency
+CLAUDE.md conventions say governance models use `{MODEL}.md`. The files
+are `SOLO-AI.md`, `SMALL-TEAM.md`, `ENTERPRISE.md`. The README refers
+to them as "Solo + AI", "Small Team", "Enterprise" — the naming is
+consistent but the file naming convention in CLAUDE.md is ambiguous.
+Fix: Minor — clarify the convention in CLAUDE.md or leave as-is (the
+current names are clear and follow kebab-case).
+
+---
+
+**F49 — Phase 0 at 491 lines could benefit from a quick-start summary**
+File: docs/framework/PHASE-0-FOUNDATION.md
+Personas: First Principles
+Phase 0 is where new users start but at 491 lines it's substantial. A
+5-line "TL;DR" at the top would help new users understand the minimum
+viable Phase 0.
+Fix: Add a brief "Minimum Viable Phase 0" summary box at the top.
+
+---
+
+**F50 — init.sh doesn't display elapsed time**
+File: scripts/init.sh
+Personas: SRE/DevOps
+The bootstrap script doesn't report how long it took to run. For
+user experience and diagnostics, a completion time is helpful.
+Fix: Capture start time at the top (`START_TIME=$(date +%s)`) and
+display elapsed time at the end.
+
+---
+
+**F51 — No PR template**
+File: .github/
+Personas: SRE/DevOps
+The repo has CI workflows but no `.github/pull_request_template.md`.
+Adding a PR template would encourage consistent PR descriptions and
+ensure reviewers check specific items.
+Fix: Add a basic PR template with sections for Summary, Testing,
+and Checklist.
+
+---
+
+**F52 — Self-compliance REQUIREMENTS.md doesn't use the same template it provides**
+File: docs/REQUIREMENTS.md
+Personas: Radical Transparency
+The framework provides `templates/REQUIREMENTS.md` (193 lines) as a
+standard template, but the framework's own `docs/REQUIREMENTS.md`
+(41 lines) doesn't follow the same template structure. This undermines
+the "practices what it preaches" principle.
+Fix: Align the self-compliance REQUIREMENTS.md with the template
+structure, or document why the framework's own requirements use a
+simplified format.
+
+---
+
+================================================================================
+## SUMMARY
+================================================================================
+
+- Critical: 0 — no immediate safety issues
+- High: 7 — address this sprint
+- Medium: 24 — fix within 2 sprints
+- Low: 21 — address when convenient
+- Total unique: 52
+
+### Persona Agreement Matrix
+
+Findings flagged by multiple personas (higher confidence):
+
+| Finding | Personas | Count |
+|---------|----------|-------|
+| F1 (dead code) | SE, FP, RT, SRE | 4 |
+| F2 (CI SHA pinning) | SA, SRE | 2 |
+| F3 (gitleaks license) | SE, SA, SRE | 3 |
+| F8/F31 (Chapter 1 path) | RT, SRE | 2 |
+| F9 (reference count) | RT, SRE | 2 |
+| F10 (shellcheck) | SE, SRE | 2 |
+| F11 (CHANGELOG link) | SE, SRE | 2 |
+| F12 (template lint) | SE, SRE | 2 |
+| F13 (no contact email) | SE, RT | 2 |
+| F14 (captain-logs naming) | SE, RT | 2 |
+| F16 (Olympus terminology) | FP, RT | 2 |
+
+Legend: SE=Staff Engineer, FP=First Principles, RT=Radical Transparency,
+SA=CTO/Security, SRE=SRE/DevOps
+
+================================================================================
+## RESOLUTION LOG
+================================================================================
+
+All 7 High findings resolved on 2026-03-06:
+
+| Finding | Resolution | Status |
+|---------|-----------|--------|
+| F1 | Deleted unreachable dead code block (lines 203-210) from init.sh | Resolved |
+| F2 | Pinned all 5 CI actions to SHA commits with version comments | Resolved |
+| F3 | Replaced gitleaks-action (paid) with direct gitleaks CLI install | Resolved |
+| F4 | Added --strict flag, integrity_warn tracking, source validation | Resolved |
+| F5 | Consolidated sections 10-12 into a single summary with forward refs to Autonomous Execution Guide (792→736 lines) | Resolved |
+| F6 | Added SLO/SLI section to Phase 5: SLI identification, SLO targets, error budgets, burn-rate alerting | Resolved |
+| F7 | Added Security Scanning stage to CI/CD template: SAST, dep audit, secret scan, container scan | Resolved |
+
+Additional fixes applied during resolution:
+- init.sh: Fixed F14 (captain-logs → docs/captains_log), added F25 fix (source file existence check in copy_template)
+- init.sh: Replaced positional $1 parsing with loop-based argument parsing for --strict support
+
+================================================================================
+END OF REVIEW
+================================================================================
