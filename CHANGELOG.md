@@ -5,6 +5,17 @@ All notable changes to the AI-DLC framework are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Chapter 1 narrative history of the AI-DLC project (`docs/reference/CHAPTER-1.md`)
+- Framework self-compliance artifacts (REQUIREMENTS, TRACEABILITY-MATRIX, USER-STORIES)
+
+### Changed
+- Five-persona security guidance review: 19 findings, 14 fixed, 4 deferred, 1 accepted
+- Five-persona custom skills review: 71 findings across 6 skills, all 71 resolved
+- Retrospective action items 1-4 marked complete
+
 ## [1.1.0] - 2026-02-17
 
 ### Added

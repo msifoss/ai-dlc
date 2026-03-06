@@ -15,7 +15,7 @@ AI coding assistants are powerful but undisciplined. Without structure, they pro
 - Ships without cost awareness, monitoring, or rollback plans
 
 AI-DLC fixes this. It's built from real production experience — not theory — synthesizing lessons from:
-- **Battle-tested delivery** — 25 bolts, 216 tests, 200+ security findings, 9-day production deployment
+- **Battle-tested delivery** — synthesized from the CallHero reference implementation (25 bolts, 216 tests, 200+ security findings, 9-day production deployment)
 - **Autonomous execution philosophy** — structured workflows with validation gates
 - **Industry standards** — AWS Well-Architected Framework, NIST AI RMF, ISO/IEC 42001, OWASP Top 10 for LLMs
 
