@@ -20,12 +20,19 @@ ai-dlc/
 ├── README.md                    # Framework overview + quick start
 ├── CLAUDE.md                    # This file — framework context
 ├── CHANGELOG.md                 # Version history
+├── SECURITY.md                  # Security policy + review history
 ├── docs/
 │   ├── framework/               # 7 phase guides (PHASE-0 through PHASE-6)
 │   ├── pillars/                 # 4 cross-cutting concerns
 │   ├── governance/              # 3 team models (solo, small, enterprise)
-│   └── reference/               # 6 reference documents
+│   ├── reference/               # 6 reference documents
+│   ├── decisions/               # Architecture decision records (ADRs)
+│   ├── captains_log/            # Session decision logs
+│   ├── reviews/                 # Five-persona review archives
+│   ├── security/                # Security audit reports
+│   └── story/                   # Project narrative history
 ├── templates/                   # 14 foundational document templates
+├── .github/workflows/           # CI pipeline (lint, links, secrets)
 └── scripts/
     └── init.sh                  # Bootstrap script for new projects
 ```
