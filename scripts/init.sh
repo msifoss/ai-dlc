@@ -21,6 +21,17 @@ TEMPLATES_DIR="${AI_DLC_ROOT}/templates"
 TARGET_DIR="$(pwd)"
 MODE="${1:-default}"
 
+# Validate mode argument
+case "$MODE" in
+    default|""|--minimal|--full) ;;
+    *) echo "Error: Unknown mode: $MODE" >&2
+       echo "Usage: $0 [--minimal|--full]" >&2
+       echo "  (no flag)   Default — 8 essential + workflow documents" >&2
+       echo "  --minimal   4 essential documents only" >&2
+       echo "  --full      All 14 foundational documents" >&2
+       exit 1 ;;
+esac
+
 # --- Colors ---
 
 RED='\033[0;31m'
@@ -61,6 +72,10 @@ if [ -d "${AI_DLC_ROOT}/.git" ]; then
     if [ -z "$REMOTE_URL" ]; then
         warn "AI-DLC source has no git remote configured. Templates are unverified."
         warn "Ensure $AI_DLC_ROOT is a trusted, unmodified clone of the AI-DLC repository."
+    elif [[ ! "$REMOTE_URL" =~ github\.com[:/]msifoss/ai-dlc ]]; then
+        warn "AI-DLC remote ($REMOTE_URL) does not match the expected source."
+        warn "Expected: github.com/msifoss/ai-dlc"
+        warn "Ensure this is a trusted fork or mirror before proceeding."
     fi
     # Check for uncommitted modifications to templates
     if git -C "$AI_DLC_ROOT" diff --quiet -- templates/ 2>/dev/null; then
@@ -83,9 +98,10 @@ fi
 # --- Banner ---
 
 echo ""
+AI_DLC_VERSION=$(git -C "$AI_DLC_ROOT" describe --tags --abbrev=0 2>/dev/null || echo "dev")
 echo -e "${BLUE}╔══════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║         AI-DLC Project Bootstrap         ║${NC}"
-echo -e "${BLUE}║     AI Development Life Cycle v1.1.0     ║${NC}"
+printf "${BLUE}║     AI Development Life Cycle %-10s ║${NC}\n" "$AI_DLC_VERSION"
 echo -e "${BLUE}╚══════════════════════════════════════════╝${NC}"
 echo ""
 info "Target directory: $TARGET_DIR"

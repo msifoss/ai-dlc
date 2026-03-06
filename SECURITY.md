@@ -20,7 +20,7 @@ If you discover a security issue with the framework's guidance or bootstrap scri
 
 | Date | Scope | Reviewer | Findings | Status |
 |------|-------|----------|----------|--------|
-| 2026-03-06 | Full repository security audit | AI-assisted (9-category) | 5 findings (0 Critical, 0 High, 3 Medium, 2 Low) | Complete |
+| 2026-03-06 | Full repository security audit | AI-assisted (9-category) | 5 findings (0C, 0H, 3M, 2L) — all 5 fixed same-day | Complete |
 | 2026-03-03 | Five-persona review of security guidance | AI-assisted (5 personas) | 19 findings (14 fixed, 4 deferred, 1 accepted) | Complete |
 | 2026-02-17 | Initial content review (v1.1.0) | Framework self-assessment | See below | Complete |
 
@@ -28,7 +28,7 @@ If you discover a security issue with the framework's guidance or bootstrap scri
 
 Full report: [`docs/security/20260306-212355-security-audit.txt`](docs/security/20260306-212355-security-audit.txt)
 
-5 findings across 9 categories (Authentication, Input Validation, Secrets, Encryption, Network, Infrastructure, Dependencies, Monitoring, Operational). 0 Critical, 0 High, 3 Medium (init.sh MODE validation, init.sh remote URL verification, no CI pipeline), 2 Low (no branch protection, hardcoded version in banner). 4 deferred findings from prior review remain tracked for v1.2.0.
+5 findings across 9 categories. 0 Critical, 0 High, 3 Medium (init.sh MODE validation, init.sh remote URL verification, no CI pipeline), 2 Low (no branch protection, hardcoded version in banner). All 5 fixed same-day: init.sh hardened with allowlist validation and remote URL check, CI pipeline added (.github/workflows/ci.yml), branch protection enabled on main (1 approver required), version banner reads from git tag. 4 deferred findings from prior review remain tracked for v1.2.0.
 
 ### 2026-03-03 Five-Persona Security Guidance Review
 

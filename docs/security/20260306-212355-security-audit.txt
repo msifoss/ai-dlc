@@ -205,12 +205,12 @@ N/A — no cloud infrastructure. init.sh only copies local files.
 
 ## Recommendations
 
-1. [M1] Add MODE allowlist validation to init.sh (5 min fix)
-2. [M2] Add remote URL verification to init.sh integrity check (10 min fix)
+1. [M1] Add MODE allowlist validation to init.sh — FIXED 2026-03-06
+2. [M2] Add remote URL verification to init.sh integrity check — FIXED 2026-03-06
 3. [M3] Add minimal GitHub Actions workflow for link checking and secret
-   scanning (30-60 min)
-4. [L1] Enable branch protection on main (5 min, GitHub settings)
-5. [L2] Make init.sh version dynamic (5 min fix)
+   scanning — FIXED 2026-03-06 (.github/workflows/ci.yml)
+4. [L1] Enable branch protection on main — FIXED 2026-03-06 (1 approver required)
+5. [L2] Make init.sh version dynamic — FIXED 2026-03-06 (reads from git tag)
 6. Continue tracking the 4 deferred findings from prior review for v1.2.0
 
 ## Accepted Risks
