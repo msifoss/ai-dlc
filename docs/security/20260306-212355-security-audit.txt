@@ -1,0 +1,227 @@
+================================================================================
+SECURITY AUDIT: AI-DLC Framework
+Date: 2026-03-06 21:23
+Scope: Full repository audit
+Auditor: Claude (AI-assisted)
+Version: 1.1.0 (unreleased changes post-v1.1.0)
+================================================================================
+
+## Summary
+
+| Category           | Findings | Critical | High | Medium | Low |
+|--------------------|----------|----------|------|--------|-----|
+| Authentication     | 0        | 0        | 0    | 0      | 0   |
+| Input Validation   | 1        | 0        | 0    | 1      | 0   |
+| Secrets            | 0        | 0        | 0    | 0      | 0   |
+| Encryption         | 0        | 0        | 0    | 0      | 0   |
+| Network            | 0        | 0        | 0    | 0      | 0   |
+| Infrastructure     | 0        | 0        | 0    | 0      | 0   |
+| Dependencies       | 0        | 0        | 0    | 0      | 0   |
+| Monitoring         | 1        | 0        | 0    | 0      | 1   |
+| Operational        | 2        | 0        | 0    | 1      | 1   |
+| Supply Chain       | 1        | 0        | 0    | 1      | 0   |
+| **Total**          | **5**    | **0**    | **0**| **3**  | **2**|
+
+## Inventory
+
+### Entry Points
+- scripts/init.sh — Bootstrap script (the only executable in the repo)
+
+### External Integrations
+- None (documentation-only repository)
+
+### Authentication/Authorization
+- N/A — no runtime services
+
+### Secrets & Credentials
+- None found. No .env files, no API keys, no tokens, no private keys.
+- .gitignore properly excludes .env, .env.local, .env.*.local
+
+### User-Controlled Inputs
+- init.sh accepts: $1 (mode flag), $AI_DLC_ROOT (environment variable)
+
+### Dependencies
+- Zero runtime dependencies. No package.json, requirements.txt, go.mod, etc.
+
+### Infrastructure Definitions
+- None. No CI/CD, Dockerfile, IaC templates.
+
+### Network Boundaries
+- N/A
+
+### External URLs
+- 42 URLs reference legitimate public documentation (NIST, ISO, OWASP, AWS,
+  GitHub, Anthropic, research papers). All verified as public, standard sources.
+- Example/placeholder URLs (localhost, example.com) used in templates only.
+
+================================================================================
+
+## Findings
+
+### Critical
+
+(none)
+
+### High
+
+(none)
+
+### Medium
+
+[M1] init.sh does not validate MODE argument against allowlist
+File: scripts/init.sh:22
+Category: Input Validation
+Description: The MODE variable is set from $1 without validation. While the
+  script does fall through to an error message for unknown modes (line 189),
+  the variable is used in string comparisons throughout the script. A
+  whitelist check immediately after assignment would be more defensive.
+Risk: Negligible in practice — the value is only used in string equality
+  checks, never in eval/exec. But defense-in-depth suggests validating early.
+Fix: Add after line 22:
+  case "$MODE" in
+    default|""|--minimal|--full) ;;
+    *) error "Unknown mode: $MODE"; exit 1 ;;
+  esac
+
+[M2] init.sh source integrity check does not verify remote URL value
+File: scripts/init.sh:60-64
+Category: Supply Chain
+Description: The script checks that a git remote exists but does not verify
+  it points to the expected AI-DLC repository (e.g., github.com/msifoss/ai-dlc).
+  A user could clone a malicious repo, rename the remote to "origin", and the
+  integrity check would pass.
+Risk: Low — the script only copies .md files (not executable code), limiting
+  the impact of a supply chain attack. However, malicious template content
+  could mislead consuming projects.
+Fix: Add remote URL verification after line 60:
+  EXPECTED_REMOTE="github.com/msifoss/ai-dlc"
+  if [[ -n "$REMOTE_URL" && ! "$REMOTE_URL" =~ $EXPECTED_REMOTE ]]; then
+    warn "AI-DLC remote ($REMOTE_URL) does not match expected source."
+    warn "Expected: $EXPECTED_REMOTE"
+  fi
+
+[M3] No CI/CD pipeline for automated security scanning
+File: (repo-wide)
+Category: Operational
+Description: The repository has no GitHub Actions, pre-commit hooks, or
+  automated checks. While this is a docs-only repo, automated link checking,
+  markdown linting, and secret scanning (gitleaks) would catch regressions.
+Risk: Low — manual quarterly reviews are documented and followed. But
+  automated scanning catches issues between review cycles.
+Fix: Add a minimal GitHub Actions workflow:
+  - markdown-link-check for broken URLs
+  - gitleaks for secret scanning
+  - markdownlint for formatting consistency
+
+### Low
+
+[L1] No GitHub branch protection on main
+File: (repo-wide)
+Category: Monitoring
+Description: The main branch has no branch protection rules. Direct pushes
+  are allowed without PR review. For a framework that other projects consume,
+  branch protection would add a governance layer.
+Risk: Low — single-maintainer repo with clean git history. But protection
+  rules are cheap insurance against accidental force-pushes.
+Fix: Enable branch protection on main via GitHub settings:
+  - Require pull request reviews (1 reviewer)
+  - Require status checks to pass (if CI added)
+  - Disable force push
+
+[L2] init.sh version hardcoded in banner
+File: scripts/init.sh:88
+Category: Operational
+Description: The banner displays "v1.1.0" as a hardcoded string. When the
+  version bumps, this will drift unless manually updated.
+Risk: Cosmetic only — no security impact, but reduces trust if version
+  displayed doesn't match actual release.
+Fix: Read version dynamically:
+  VERSION=$(grep "^- \*\*Version:\*\*" "$AI_DLC_ROOT/CLAUDE.md" | \
+    sed 's/.*\*\* //' || echo "unknown")
+  Or extract from the latest git tag:
+  VERSION=$(git -C "$AI_DLC_ROOT" describe --tags --abbrev=0 2>/dev/null \
+    || echo "dev")
+
+================================================================================
+
+## Deferred Findings from Prior Review (2026-03-03)
+
+The following findings were deferred from the five-persona security guidance
+review. Status as of this audit:
+
+| ID | Finding | Severity | Status | Notes |
+|----|---------|----------|--------|-------|
+| ATK-003 | Mermaid/markdown injection in AI context files | Medium | Still deferred | Framework guidance added; tooling fix requires upstream support |
+| AUD-005 | No machine-readable compliance evidence format | Low | Still deferred | JSON/YAML evidence format planned for v1.2.0 |
+| COST-001 | No cost ceiling enforcement mechanism | Low | Still deferred | Kill-switch pattern documented; enforcement is project-specific |
+| USR-003 | No progressive complexity onboarding path | Medium | Still deferred | Quick-start exists; graduated learning path planned for v1.2.0 |
+
+================================================================================
+
+## Checklist Results
+
+### A. Authentication & Authorization
+N/A — documentation-only repository, no services or endpoints.
+
+### B. Input Validation
+- [x] init.sh validates TEMPLATES_DIR existence
+- [x] init.sh validates git repository presence
+- [~] MODE argument validated via fall-through (not allowlist) — see M1
+- [x] copy_template checks file existence before overwriting
+
+### C. Secrets Management
+- [x] No secrets in source code (verified via pattern search)
+- [x] No secrets in CI/CD definitions (no CI/CD exists)
+- [x] .env files excluded via .gitignore
+- [x] No log output contains secrets
+- [x] Templates use placeholder values with TODO markers
+
+### D. Encryption
+N/A — no data storage, no network services.
+
+### E. Network Security
+N/A — no network services, no VPCs, no endpoints.
+
+### F. Infrastructure Security
+N/A — no cloud infrastructure. init.sh only copies local files.
+
+### G. Dependency Security
+- [x] Zero runtime dependencies
+- [x] No package managers in use
+- [x] No known CVEs (nothing to scan)
+
+### H. Monitoring & Incident Response
+- [~] No automated checks — see M3 and L1
+- [x] Security review history tracked in SECURITY.md
+- [x] Quarterly review cadence documented (next: 2026-06-03)
+
+### I. Operational Security
+- [~] No CI pipeline — see M3
+- [x] Clean git history with meaningful commits
+- [x] .gitignore properly configured
+- [x] init.sh uses set -euo pipefail
+
+================================================================================
+
+## Recommendations
+
+1. [M1] Add MODE allowlist validation to init.sh (5 min fix)
+2. [M2] Add remote URL verification to init.sh integrity check (10 min fix)
+3. [M3] Add minimal GitHub Actions workflow for link checking and secret
+   scanning (30-60 min)
+4. [L1] Enable branch protection on main (5 min, GitHub settings)
+5. [L2] Make init.sh version dynamic (5 min fix)
+6. Continue tracking the 4 deferred findings from prior review for v1.2.0
+
+## Accepted Risks
+
+| Item | Rationale |
+|------|-----------|
+| No CI/CD pipeline | Low-risk docs-only repo with quarterly manual reviews. M3 recommends adding one, but the current review cadence is adequate. |
+| Direct push to main | Single-maintainer repo with clean history. L1 recommends protection, but current workflow is efficient for solo development. |
+| Templates contain security placeholders | By design — TODO markers ensure consuming projects fill in their own security controls. |
+| No runtime dependencies | By design — documentation framework has no code to execute. |
+
+================================================================================
+END OF AUDIT
+================================================================================
