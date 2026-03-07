@@ -186,6 +186,7 @@ AI-DLC includes [14 foundational document templates](templates/) ready to use in
 - [AWS Well-Architected Mapping](docs/reference/AWS-WELL-ARCHITECTED-MAPPING.md) — AI-DLC to WAF alignment
 - [Audit Scoring](docs/reference/AUDIT-SCORING.md) — 9-dimension assessment methodology
 - [Autonomous Execution Guide](docs/reference/AUTONOMOUS-EXECUTION-GUIDE.md) — The Ascent, multi-agent execution, trust-adaptive gates
+- [Framework Review (March 2026)](docs/reference/FRAMEWORK-REVIEW-2026-03.md) — Industry benchmark against 17 external sources
 - [Glossary](docs/reference/GLOSSARY.md) — Key terms and definitions
 
 ---
