@@ -9,9 +9,9 @@
 
 ## What This Project Is
 
-AI-DLC is the definitive framework for producing production-grade, AI-assisted software. It provides seven sequential phases, four cross-cutting pillars, governance models for different team sizes, and 14 foundational document templates.
+AI-DLC is the definitive framework for producing production-grade, AI-assisted software. It provides seven sequential phases, four cross-cutting pillars, governance models for different team sizes, 14 foundational document templates, and a complete skills ecosystem of 28 Claude Code commands and skills.
 
-This is a **documentation-only repository** — no application code, no runtime dependencies. The deliverables are markdown files that other projects consume as guidance and templates.
+This is a **documentation + skills repository** — no application code, no runtime dependencies. The deliverables are markdown files that other projects consume as guidance, templates, and executable AI-assisted workflows.
 
 ## Repository Structure
 
@@ -32,9 +32,14 @@ ai-dlc/
 │   ├── security/                # Security audit reports
 │   └── story/                   # Project narrative history
 ├── templates/                   # 14 foundational document templates
+├── skills/
+│   ├── README.md                # Skills ecosystem overview + install guide
+│   ├── commands/                # 16 slash commands (bolt-lfg, brainstorm, setup, etc.)
+│   └── skills/                  # 12 full skills (dlc-audit, staff-panel, motherhen, etc.)
 ├── .github/workflows/           # CI pipeline (lint, links, secrets)
 └── scripts/
-    └── init.sh                  # Bootstrap script for new projects
+    ├── init.sh                  # Bootstrap script for new projects
+    └── install-skills.sh        # Install skills into ~/.claude/
 ```
 
 ## Conventions
