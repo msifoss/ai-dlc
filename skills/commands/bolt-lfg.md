@@ -64,7 +64,23 @@ During planning:
 - Pull items from the backlog or create new ones based on $ARGUMENTS
 - Define the bolt goal, items, and success criteria
 
-GATE: STOP. Verify that `docs/pm/CURRENT-SPRINT.md` has been updated with a new bolt. If not, planning did not complete — run `/pm plan` again. Do NOT proceed to Step 3 without an active bolt.
+GATE: STOP. Verify that `docs/pm/CURRENT-SPRINT.md` has been updated with a new bolt. If not, planning did not complete — run `/pm plan` again. Do NOT proceed to Step 2b without an active bolt.
+
+---
+
+## Step 2b: Deepen the Plan
+
+```
+/deepen-plan
+```
+
+This launches 4 parallel research agents to stress-test the plan:
+- **Learnings Researcher** — searches docs/solutions/ and docs/captains_log/ for relevant past decisions
+- **Codebase Researcher** — finds existing patterns, reusable code, and potential conflicts
+- **Best Practices Researcher** — identifies pitfalls, security concerns, and performance anti-patterns
+- **Framework Compliance Researcher** — checks AI-DLC phase requirements and governance gates
+
+GATE: STOP. Verify that the plan in CURRENT-SPRINT.md now has a "Research Summary" section with amendments applied. If /deepen-plan found "Must Address" items, they must be integrated before work begins. Do NOT proceed to Step 3 without a research-hardened plan.
 
 ---
 
@@ -243,6 +259,7 @@ tags: [relevant-tags]
 |------|---------|------|-------------|
 | 1 | `/brainstorm` (conditional) | Brainstorm doc exists OR skip justified | `docs/brainstorms/*.md` |
 | 2 | `/pm plan` | Active bolt in CURRENT-SPRINT.md | `docs/pm/CURRENT-SPRINT.md` |
+| 2b | `/deepen-plan` | Research summary + amendments applied | Research-hardened plan |
 | 3 | (implementation) | Code changes + tests pass | Modified source files |
 | 4 | `/five-persona-review` | Review doc + critical findings fixed | `docs/reviews/*.txt` |
 | 5 | `/captainslog new` | Captain's log created | `docs/captains_log/*.txt` |

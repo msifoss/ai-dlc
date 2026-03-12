@@ -18,7 +18,16 @@ for skill in skills/skills/*/; do
 done
 ```
 
-Or use the bootstrap script:
+Or use the CLI:
+
+```bash
+bash scripts/dlc install      # Install all skills
+bash scripts/dlc doctor       # Validate installation
+bash scripts/dlc list         # Show installed skills
+bash scripts/dlc export json  # Export in JSON format
+```
+
+Legacy bootstrap script also available:
 
 ```bash
 bash scripts/install-skills.sh
@@ -28,13 +37,18 @@ bash scripts/install-skills.sh
 
 ```
 skills/
-├── commands/          # 16 slash commands (lightweight, single-phase)
+├── commands/          # 21 slash commands (lightweight, single-phase)
 │   ├── bolt-lfg.md        # Autonomous bolt pipeline
 │   ├── brainstorm.md      # Explore before you plan
 │   ├── setup.md           # Per-project configuration
 │   ├── pm.md              # Bolt sprint management
 │   ├── captainslog.md     # Session decision records
 │   ├── five-persona-review.md  # Adversarial code review
+│   ├── deepen-plan.md       # Parallel research to strengthen plans
+│   ├── slfg.md              # Swarm mode parallel pipeline
+│   ├── create-skill.md      # Meta-tool: scaffold new skills
+│   ├── heal-skill.md        # Meta-tool: diagnose/fix broken skills
+│   ├── generate-command.md  # Meta-tool: quick command generator
 │   └── ...
 └── skills/            # 12 full skills (multi-phase, rich personas)
     ├── dlc-audit/         # 9-dimension compliance audit
@@ -49,7 +63,7 @@ skills/
 The AI-DLC bolt lifecycle, now with an autonomous pipeline:
 
 ```
-/brainstorm → /pm plan → work → /five-persona-review → /captainslog → /pm close
+/brainstorm → /pm plan → /deepen-plan → work → /five-persona-review → /captainslog → /pm close
      │              │                    │                      │
      └── docs/brainstorms/  ←──── auto-discovered ────→  docs/solutions/
                                   (knowledge loop)
@@ -81,6 +95,11 @@ Or run the full autonomous pipeline:
 | `/readme` | Auto-generated README.md | ~20 |
 | `/security-audit` | 9-category OWASP security audit | ~180 |
 | `/staff-panel` | Staff engineer panel (stub → skill) | ~22 |
+| `/deepen-plan` | Parallel research agents to stress-test plans | ~160 |
+| `/slfg` | Swarm mode parallel bolt pipeline | ~210 |
+| `/create-skill` | Meta-tool: scaffold new skills and commands | ~200 |
+| `/heal-skill` | Meta-tool: diagnose and fix broken skills | ~220 |
+| `/generate-command` | Meta-tool: quick lightweight command generator | ~80 |
 
 ## Skills Reference
 
@@ -117,6 +136,18 @@ Skills like `/staff-panel`, `/exec-review`, `/llm-team`, and `/marketing-team` u
 
 ### Per-Project Configuration
 `/setup` creates `.ai-dlc.local.yaml` with project-specific settings (review focus areas, test commands, health thresholds). Skills read this file to adapt behavior per project.
+
+### Plan Deepening (Parallel Research)
+`/deepen-plan` launches 4 independent research agents simultaneously — learnings, codebase, best practices, and framework compliance. Results are synthesized into plan amendments ranked by priority. Plans are research-hardened before work begins.
+
+### Swarm Mode Execution
+`/slfg` decomposes work into independent items and executes them in parallel via background agents. Falls back to sequential `/bolt-lfg` when dependencies prevent parallelization. Same quality gates, faster throughput.
+
+### Self-Improving Skills (Meta-Tools)
+Three meta-tools form a flywheel: `/create-skill` scaffolds new skills with correct patterns, `/heal-skill` diagnoses and fixes broken skills, `/generate-command` rapidly creates lightweight commands. Skills can create and maintain other skills.
+
+### Distribution CLI
+`scripts/dlc` provides install, update, list, doctor, export (markdown/json/yaml), diff, and uninstall. Single command to manage the entire skills ecosystem.
 
 ### Portable Paths
 All skills use environment variables with defaults (`${TICKY_HOME:-$HOME/repos/ticky}`) instead of hardcoded paths. Override via `.ai-dlc.local.yaml` or environment.
