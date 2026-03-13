@@ -1,6 +1,6 @@
 # /slfg — Swarm Mode Autonomous Pipeline
 
-Usage: `/slfg [feature description or goal]`
+Usage: `/slfg [--speed] [feature description or goal]`
 
 **Arguments:** $ARGUMENTS
 
@@ -16,9 +16,18 @@ Parallel execution variant of `/bolt-lfg`. Breaks work into independent items an
 
 ## Instructions for Claude
 
-### Step 0: Assess Parallelizability
+### Step 0: Parse Mode and Assess Parallelizability
 
-Read $ARGUMENTS and determine if the work can be parallelized:
+**Speed mode:** If $ARGUMENTS contains `--speed`, enable speed mode:
+- Skip brainstorm (requirements assumed clear)
+- Use `/deepen-plan` with only 4 core agents instead of 10 (learnings, codebase, best practices, compliance)
+- Skip captain's log (capture knowledge post-merge)
+- Reduce review to 5 core personas instead of 12
+- Total overhead: ~60% less than full mode
+
+**Full mode (default):** All 10 research agents, 12 review personas, full knowledge capture.
+
+Read $ARGUMENTS (excluding flags) and determine if the work can be parallelized:
 
 **Parallelizable indicators:**
 - Multiple independent files to create/modify
@@ -49,19 +58,21 @@ GATE: Brainstorm doc exists OR requirements are clear enough to skip.
 
 ---
 
-### Step 2: Plan + Deepen
+### Step 2: Plan + Deepen (Ultrathink Mode)
 
 Run planning and research:
 ```
 /pm plan
 ```
 
-Then immediately deepen the plan:
+Then immediately deepen the plan with all 10 research agents:
 ```
 /deepen-plan
 ```
 
-GATE: Active bolt in CURRENT-SPRINT.md with research-hardened plan.
+**Ultrathink mode:** During deepening, each research agent uses extended thinking — exploring multiple approaches, reasoning through trade-offs, and producing deeper analysis than standard mode. This is the key differentiator: quantity (10 agents) x quality (extended reasoning) = comprehensive plan coverage.
+
+GATE: Active bolt in CURRENT-SPRINT.md with research-hardened plan from 10 agents.
 
 ---
 

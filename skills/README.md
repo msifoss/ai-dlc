@@ -37,7 +37,7 @@ bash scripts/install-skills.sh
 
 ```
 skills/
-├── commands/          # 21 slash commands (lightweight, single-phase)
+├── commands/          # 22 slash commands (lightweight, single-phase)
 │   ├── bolt-lfg.md        # Autonomous bolt pipeline
 │   ├── brainstorm.md      # Explore before you plan
 │   ├── setup.md           # Per-project configuration
@@ -84,7 +84,7 @@ Or run the full autonomous pipeline:
 | `/setup` | Per-project `.ai-dlc.local.yaml` configuration | 185 |
 | `/pm` | Bolt sprint management (plan/close/status/backlog) | 288 |
 | `/captainslog` | Session decision records with auto-invoke triggers | 253 |
-| `/five-persona-review` | 5-persona adversarial code review with worktree isolation | 208 |
+| `/five-persona-review` | 12-persona parallel code review (5 core + 4 specialized + 3 adaptive) | ~350 |
 | `/arch-audit` | Multi-persona architectural audit with C4 diagrams | ~330 |
 | `/bolt-review` | End-of-sprint comprehensive review | ~110 |
 | `/budget` | Infrastructure cost tracking | ~150 |
@@ -95,11 +95,12 @@ Or run the full autonomous pipeline:
 | `/readme` | Auto-generated README.md | ~20 |
 | `/security-audit` | 9-category OWASP security audit | ~180 |
 | `/staff-panel` | Staff engineer panel (stub → skill) | ~22 |
-| `/deepen-plan` | Parallel research agents to stress-test plans | ~160 |
+| `/deepen-plan` | 10 parallel research agents to stress-test plans | ~280 |
 | `/slfg` | Swarm mode parallel bolt pipeline | ~210 |
 | `/create-skill` | Meta-tool: scaffold new skills and commands | ~200 |
 | `/heal-skill` | Meta-tool: diagnose and fix broken skills | ~220 |
 | `/generate-command` | Meta-tool: quick lightweight command generator | ~80 |
+| `/quickstart` | 60-second onboarding — reduces 33 tools to 3 commands | ~60 |
 
 ## Skills Reference
 
@@ -137,8 +138,8 @@ Skills like `/staff-panel`, `/exec-review`, `/llm-team`, and `/marketing-team` u
 ### Per-Project Configuration
 `/setup` creates `.ai-dlc.local.yaml` with project-specific settings (review focus areas, test commands, health thresholds). Skills read this file to adapt behavior per project.
 
-### Plan Deepening (Parallel Research)
-`/deepen-plan` launches 4 independent research agents simultaneously — learnings, codebase, best practices, and framework compliance. Results are synthesized into plan amendments ranked by priority. Plans are research-hardened before work begins.
+### Plan Deepening (10-Agent Parallel Research)
+`/deepen-plan` launches 10 independent research agents in 3 batches — learnings, codebase, best practices, framework compliance, security surface, dependency risks, test strategy, performance impact, deployment/ops, and cost projection. Results are synthesized into plan amendments ranked by priority. Plans are research-hardened before work begins.
 
 ### Swarm Mode Execution
 `/slfg` decomposes work into independent items and executes them in parallel via background agents. Falls back to sequential `/bolt-lfg` when dependencies prevent parallelization. Same quality gates, faster throughput.
@@ -146,8 +147,11 @@ Skills like `/staff-panel`, `/exec-review`, `/llm-team`, and `/marketing-team` u
 ### Self-Improving Skills (Meta-Tools)
 Three meta-tools form a flywheel: `/create-skill` scaffolds new skills with correct patterns, `/heal-skill` diagnoses and fixes broken skills, `/generate-command` rapidly creates lightweight commands. Skills can create and maintain other skills.
 
-### Distribution CLI
-`scripts/dlc` provides install, update, list, doctor, export (markdown/json/yaml), diff, and uninstall. Single command to manage the entire skills ecosystem.
+### Cross-Platform Distribution
+`scripts/dlc` provides install, update, list, doctor, export (markdown/json/yaml), **convert** (cursor, copilot, windsurf, codex, gemini, opencode), diff, and uninstall. The `convert` command exports skills for 6 AI platforms beyond Claude Code, closing the platform reach gap.
+
+### Cognitive Load Reduction
+`/quickstart` reduces 33 tools to 3 commands for new users. Build (`/bolt-lfg`), build fast (`/slfg`), review (`/five-persona-review`). Everything else is discoverable from there.
 
 ### Portable Paths
 All skills use environment variables with defaults (`${TICKY_HOME:-$HOME/repos/ticky}`) instead of hardcoded paths. Override via `.ai-dlc.local.yaml` or environment.
