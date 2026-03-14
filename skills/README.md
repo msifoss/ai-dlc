@@ -4,33 +4,27 @@ Custom Claude Code commands and skills that implement the AI-DLC methodology. Th
 
 ## Installation
 
-Copy to your Claude Code configuration directory:
+One-liner install (no git clone needed):
 
 ```bash
-# Commands (slash commands)
-cp skills/commands/*.md ~/.claude/commands/
-
-# Skills (full agent-based skills)
-for skill in skills/skills/*/; do
-  name=$(basename "$skill")
-  mkdir -p ~/.claude/skills/$name
-  cp -r "$skill"* ~/.claude/skills/$name/
-done
+curl -fsSL https://raw.githubusercontent.com/msifoss/ai-dlc/main/scripts/dlc | bash -s install
 ```
 
-Or use the CLI:
+Or from a local clone:
 
 ```bash
-bash scripts/dlc install      # Install all skills
-bash scripts/dlc doctor       # Validate installation
-bash scripts/dlc list         # Show installed skills
-bash scripts/dlc export json  # Export in JSON format
+git clone https://github.com/msifoss/ai-dlc.git
+cd ai-dlc && bash scripts/dlc install
 ```
 
-Legacy bootstrap script also available:
+Management commands:
 
 ```bash
-bash scripts/install-skills.sh
+bash scripts/dlc doctor           # Validate installation
+bash scripts/dlc list             # Show installed skills
+bash scripts/dlc export json      # Export in JSON format
+bash scripts/dlc convert cursor   # Export for Cursor AI
+bash scripts/dlc convert all      # Export for all 11 platforms
 ```
 
 ## Architecture
@@ -147,8 +141,8 @@ Skills like `/staff-panel`, `/exec-review`, `/llm-team`, and `/marketing-team` u
 ### Self-Improving Skills (Meta-Tools)
 Three meta-tools form a flywheel: `/create-skill` scaffolds new skills with correct patterns, `/heal-skill` diagnoses and fixes broken skills, `/generate-command` rapidly creates lightweight commands. Skills can create and maintain other skills.
 
-### Cross-Platform Distribution
-`scripts/dlc` provides install, update, list, doctor, export (markdown/json/yaml), **convert** (cursor, copilot, windsurf, codex, gemini, opencode), diff, and uninstall. The `convert` command exports skills for 6 AI platforms beyond Claude Code, closing the platform reach gap.
+### Cross-Platform Distribution (11 Platforms)
+`scripts/dlc` provides install, update, list, doctor, export, **convert** (cursor, copilot, windsurf, codex, gemini, opencode, kiro, qwen, factory, pi, openclaw), diff, and uninstall. The `convert` command exports **full skill content** (not summaries) for 11 AI platforms. For Cursor, individual skills become separate `.cursor/rules/` files. One-liner curl install — no git clone required.
 
 ### Cognitive Load Reduction
 `/quickstart` reduces 33 tools to 3 commands for new users. Build (`/bolt-lfg`), build fast (`/slfg`), review (`/five-persona-review`). Everything else is discoverable from there.

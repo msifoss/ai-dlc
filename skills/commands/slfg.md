@@ -134,10 +134,27 @@ After parallel agents complete, execute sequential items in dependency order. Ea
 After ALL agents complete:
 1. Check for merge conflicts between parallel changes
 2. If conflicts exist, resolve them (prefer the change that matches the plan)
-3. Run the FULL test suite to verify nothing broke
-4. If tests fail, identify which agent's changes caused the failure and fix
+3. Run the **full validation suite** (not just tests):
 
-GATE: All items implemented. Full test suite passes. No unresolved conflicts.
+```bash
+# Auto-detect and run all available validation
+# Tests
+[test command from .ai-dlc.local.yaml, or auto-detected]
+
+# Linting (if configured)
+[lint command if available — eslint, ruff, rubocop, clippy, etc.]
+
+# Type checking (if configured)
+[type check command if available — tsc --noEmit, mypy, etc.]
+
+# Build verification
+[build command if available — ensure the project compiles/bundles]
+```
+
+4. If any validation fails, identify which agent's changes caused the failure and fix
+5. Re-run failed validations after fixes
+
+GATE: All items implemented. Full validation suite passes (tests + lint + types + build). No unresolved conflicts.
 
 ---
 

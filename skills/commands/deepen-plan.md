@@ -8,9 +8,9 @@ Usage: `/deepen-plan [plan file or topic]`
 
 ## Purpose
 
-Before work begins, launch parallel research agents to stress-test and enrich a plan. Inspired by compound engineering's deepen-plan pattern but integrated with AI-DLC's knowledge compounding loop.
+Before work begins, launch 10 domain-specialized research agents to stress-test and enrich a plan. Each agent covers a distinct research domain — not generic breadth, but targeted depth across the full risk surface.
 
-> Plans fail because of what you don't know. This command sends 10 research agents out simultaneously to find what you missed — past learnings, codebase patterns, best practices, framework constraints, security surface, dependency risks, test strategy, performance concerns, deployment risks, and cost projections.
+> Plans fail because of what you don't know. This command sends 10 specialized agents — each covering a distinct risk domain (learnings, codebase, best practices, compliance, security, dependencies, tests, performance, operations, cost). Domain-specialized agents with extended thinking produce deeper research than many generic agents doing broad searches. Quantity of domains x depth per domain = comprehensive coverage.
 
 ---
 

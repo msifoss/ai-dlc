@@ -12,10 +12,42 @@
 
 set -euo pipefail
 
-VERSION="1.0.0"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(dirname "$SCRIPT_DIR")"
+VERSION="2.0.0"
 CLAUDE_DIR="${HOME}/.claude"
+DLC_REPO="https://github.com/msifoss/ai-dlc.git"
+DLC_BRANCH="${DLC_BRANCH:-main}"
+
+# Detect if running from local repo or via curl
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  REPO_DIR="$(dirname "$SCRIPT_DIR")"
+else
+  # Running via curl pipe — bootstrap first
+  REPO_DIR=""
+  SCRIPT_DIR=""
+fi
+
+# Bootstrap: clone repo if not local
+_ensure_repo() {
+  if [ -n "$REPO_DIR" ] && [ -d "$REPO_DIR/skills" ]; then
+    return 0
+  fi
+
+  local dlc_home="${HOME}/.dlc"
+  if [ -d "$dlc_home/skills" ]; then
+    REPO_DIR="$dlc_home"
+    return 0
+  fi
+
+  echo -e "${BLUE}First run — cloning AI-DLC skills...${NC}"
+  git clone --depth 1 --branch "$DLC_BRANCH" "$DLC_REPO" "$dlc_home" 2>/dev/null || {
+    echo -e "${RED}Failed to clone. Check network and try again.${NC}"
+    exit 1
+  }
+  REPO_DIR="$dlc_home"
+  echo -e "${GREEN}Cloned to ${dlc_home}${NC}"
+  echo ""
+}
 
 # Colors
 RED='\033[0;31m'
@@ -40,15 +72,16 @@ usage() {
   echo "  uninstall     Remove AI-DLC skills from ~/.claude/"
   echo "  version       Show version"
   echo ""
-  echo "Quick start:"
+  echo "One-liner install (no git clone needed):"
+  echo "  curl -fsSL https://raw.githubusercontent.com/msifoss/ai-dlc/main/scripts/dlc | bash -s install"
+  echo ""
+  echo "Or from a local clone:"
   echo "  git clone https://github.com/msifoss/ai-dlc.git"
   echo "  cd ai-dlc && bash scripts/dlc install"
-  echo ""
-  echo "Or install directly:"
-  echo "  curl -fsSL https://raw.githubusercontent.com/msifoss/ai-dlc/main/scripts/dlc | bash -s install"
 }
 
 cmd_install() {
+  _ensure_repo
   echo -e "${BLUE}Installing AI-DLC skills ecosystem v${VERSION}...${NC}"
   echo "  Source: ${REPO_DIR}/skills/"
   echo "  Target: ${CLAUDE_DIR}/"
@@ -402,44 +435,50 @@ cmd_convert() {
     echo "  codex         OpenAI Codex (codex.md)"
     echo "  gemini        Gemini CLI (.gemini/)"
     echo "  opencode      OpenCode (opencode.md)"
-    echo "  all           Export to all platforms"
+    echo "  kiro          Kiro CLI (.kiro/rules/)"
+    echo "  qwen          Qwen Code (.qwen/instructions.md)"
+    echo "  factory       Factory Droid (.factory/rules.md)"
+    echo "  pi            Pi (.pi/instructions.md)"
+    echo "  openclaw      OpenClaw (.openclaw/rules.md)"
+    echo "  all           Export to all 11 platforms"
     return 0
   fi
+
+  _ensure_repo
 
   local outdir="${2:-${REPO_DIR}/exports}"
   mkdir -p "$outdir"
 
-  # Build the combined skills content
+  # Build the combined skills content (FULL content, not summaries)
   local skills_content
   skills_content=$(mktemp)
 
-  echo "# AI-DLC Skills Ecosystem" > "$skills_content"
+  echo "# AI-DLC Skills Ecosystem — Full Export" > "$skills_content"
   echo "" >> "$skills_content"
-  echo "## Commands" >> "$skills_content"
+  echo "This file contains the complete AI-DLC skills ecosystem." >> "$skills_content"
+  echo "Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$skills_content"
+  echo "" >> "$skills_content"
+
+  echo "## Commands (Full Content)" >> "$skills_content"
   echo "" >> "$skills_content"
 
   for cmd in "${REPO_DIR}/skills/commands"/*.md; do
     [ -f "$cmd" ] || continue
-    local name
-    name=$(basename "$cmd" .md)
-    echo "### /${name}" >> "$skills_content"
+    echo "---" >> "$skills_content"
     echo "" >> "$skills_content"
-    # Extract purpose section only (keep it concise for platform rules)
-    sed -n '/^## Purpose/,/^## /{ /^## Purpose/d; /^## [^P]/d; p; }' "$cmd" >> "$skills_content"
+    cat "$cmd" >> "$skills_content"
     echo "" >> "$skills_content"
   done
 
-  echo "## Skills" >> "$skills_content"
+  echo "## Skills (Full Content)" >> "$skills_content"
   echo "" >> "$skills_content"
 
   for skill_dir in "${REPO_DIR}/skills/skills"/*/; do
     [ -d "$skill_dir" ] || continue
-    local name
-    name=$(basename "$skill_dir")
     if [ -f "${skill_dir}SKILL.md" ]; then
-      echo "### /${name}" >> "$skills_content"
+      echo "---" >> "$skills_content"
       echo "" >> "$skills_content"
-      sed -n '/^## Purpose\|^## Trigger/,/^## /{ /^## Purpose\|^## Trigger/d; /^## [^PT]/d; p; }' "${skill_dir}SKILL.md" >> "$skills_content"
+      cat "${skill_dir}SKILL.md" >> "$skills_content"
       echo "" >> "$skills_content"
     fi
   done
@@ -457,27 +496,37 @@ cmd_convert() {
     case "$platform" in
       cursor)
         mkdir -p "$outdir/cursor/.cursor/rules"
-        # .cursorrules — main project rules
+        # .cursorrules — main project rules (CLAUDE.md context)
         {
           echo "# AI-DLC Framework Rules for Cursor"
           echo ""
           echo "You are working in a project that follows the AI-DLC methodology."
+          echo "Individual skill rules are in .cursor/rules/ — Cursor loads them automatically."
           echo ""
           echo "$claude_content"
-          echo ""
-          echo "---"
-          echo ""
-          cat "$skills_content"
         } > "$outdir/cursor/.cursorrules"
 
-        # Individual skill rules
+        # Individual command rules (full content, one file per skill)
+        local rule_count=0
         for cmd in "${REPO_DIR}/skills/commands"/*.md; do
           [ -f "$cmd" ] || continue
           local name
           name=$(basename "$cmd" .md)
           cp "$cmd" "$outdir/cursor/.cursor/rules/${name}.md"
+          rule_count=$((rule_count + 1))
         done
-        echo -e "    ${GREEN}✓${NC} .cursorrules + .cursor/rules/ (${outdir}/cursor/)"
+
+        # Individual skill rules (full content)
+        for skill_dir in "${REPO_DIR}/skills/skills"/*/; do
+          [ -d "$skill_dir" ] || continue
+          local name
+          name=$(basename "$skill_dir")
+          if [ -f "${skill_dir}SKILL.md" ]; then
+            cp "${skill_dir}SKILL.md" "$outdir/cursor/.cursor/rules/${name}.md"
+            rule_count=$((rule_count + 1))
+          fi
+        done
+        echo -e "    ${GREEN}✓${NC} .cursorrules + ${rule_count} individual rules in .cursor/rules/ (${outdir}/cursor/)"
         ;;
 
       copilot)
@@ -557,6 +606,79 @@ cmd_convert() {
         echo -e "    ${GREEN}✓${NC} opencode.md (${outdir}/opencode/)"
         ;;
 
+      kiro)
+        mkdir -p "$outdir/kiro/.kiro/rules"
+        {
+          echo "# AI-DLC Framework Rules for Kiro"
+          echo ""
+          echo "$claude_content"
+        } > "$outdir/kiro/.kiro/rules/ai-dlc.md"
+
+        for cmd in "${REPO_DIR}/skills/commands"/*.md; do
+          [ -f "$cmd" ] || continue
+          local name
+          name=$(basename "$cmd" .md)
+          cp "$cmd" "$outdir/kiro/.kiro/rules/${name}.md"
+        done
+        echo -e "    ${GREEN}✓${NC} .kiro/rules/ (${outdir}/kiro/)"
+        ;;
+
+      qwen)
+        mkdir -p "$outdir/qwen/.qwen"
+        {
+          echo "# AI-DLC Framework Instructions for Qwen Code"
+          echo ""
+          echo "$claude_content"
+          echo ""
+          echo "---"
+          echo ""
+          cat "$skills_content"
+        } > "$outdir/qwen/.qwen/instructions.md"
+        echo -e "    ${GREEN}✓${NC} .qwen/instructions.md (${outdir}/qwen/)"
+        ;;
+
+      factory)
+        mkdir -p "$outdir/factory/.factory"
+        {
+          echo "# AI-DLC Framework Rules for Factory Droid"
+          echo ""
+          echo "$claude_content"
+          echo ""
+          echo "---"
+          echo ""
+          cat "$skills_content"
+        } > "$outdir/factory/.factory/rules.md"
+        echo -e "    ${GREEN}✓${NC} .factory/rules.md (${outdir}/factory/)"
+        ;;
+
+      pi)
+        mkdir -p "$outdir/pi/.pi"
+        {
+          echo "# AI-DLC Framework Instructions for Pi"
+          echo ""
+          echo "$claude_content"
+          echo ""
+          echo "---"
+          echo ""
+          cat "$skills_content"
+        } > "$outdir/pi/.pi/instructions.md"
+        echo -e "    ${GREEN}✓${NC} .pi/instructions.md (${outdir}/pi/)"
+        ;;
+
+      openclaw)
+        mkdir -p "$outdir/openclaw/.openclaw"
+        {
+          echo "# AI-DLC Framework Rules for OpenClaw"
+          echo ""
+          echo "$claude_content"
+          echo ""
+          echo "---"
+          echo ""
+          cat "$skills_content"
+        } > "$outdir/openclaw/.openclaw/rules.md"
+        echo -e "    ${GREEN}✓${NC} .openclaw/rules.md (${outdir}/openclaw/)"
+        ;;
+
       *)
         echo -e "  ${RED}Unknown platform: ${platform}${NC}"
         ;;
@@ -564,8 +686,8 @@ cmd_convert() {
   }
 
   if [ "$target" = "all" ]; then
-    echo -e "${BLUE}Converting to all platforms...${NC}"
-    for p in cursor copilot windsurf codex gemini opencode; do
+    echo -e "${BLUE}Converting to all 11 platforms...${NC}"
+    for p in cursor copilot windsurf codex gemini opencode kiro qwen factory pi openclaw; do
       convert_platform "$p"
     done
   else
