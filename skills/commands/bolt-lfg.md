@@ -80,7 +80,32 @@ This launches 4 parallel research agents to stress-test the plan:
 - **Best Practices Researcher** — identifies pitfalls, security concerns, and performance anti-patterns
 - **Framework Compliance Researcher** — checks AI-DLC phase requirements and governance gates
 
-GATE: STOP. Verify that the plan in CURRENT-SPRINT.md now has a "Research Summary" section with amendments applied. If /deepen-plan found "Must Address" items, they must be integrated before work begins. Do NOT proceed to Step 3 without a research-hardened plan.
+GATE: STOP. Verify that the plan in CURRENT-SPRINT.md now has a "Research Summary" section with amendments applied. If /deepen-plan found "Must Address" items, they must be integrated before work begins. Do NOT proceed to Step 2c without a research-hardened plan.
+
+---
+
+## Step 2c: Parallel Work Detection (Smart Handoff)
+
+Before starting work, assess whether the bolt items can be parallelized:
+
+Review the items in CURRENT-SPRINT.md and check:
+
+**Parallelizable indicators (handoff to `/slfg`):**
+- 3+ independent work items that touch different files
+- No sequential dependencies between items
+- Each item can be committed independently
+
+**Sequential indicators (stay in `/bolt-lfg`):**
+- Items share files or have import dependencies
+- Later items depend on earlier items' output
+- Single complex feature spanning multiple files
+- 2 or fewer items (overhead not worth it)
+
+**If parallelizable:** Announce: "This bolt has [N] independent items — handing off to `/slfg` for parallel execution. Same quality gates, faster throughput." Then invoke `/slfg $ARGUMENTS` and stop.
+
+**If sequential or ambiguous:** Announce: "Items have dependencies — proceeding with sequential execution." Continue to Step 3.
+
+**If the user explicitly requested `/bolt-lfg`:** Skip this check — the user chose sequential for a reason.
 
 ---
 

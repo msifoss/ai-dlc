@@ -92,7 +92,40 @@ Read the plan and decompose into independent work items. For each item, determin
 - Test writing CAN parallel with implementation if tests are in separate files
 - Each item must be self-contained enough to commit independently
 
-Announce: "Decomposed into [N] parallel items and [M] sequential items."
+**Enhanced dependency detection heuristics:**
+
+Before finalizing the decomposition, run these checks:
+
+1. **File-level conflicts:** For each item pair, check if their file lists overlap:
+   ```bash
+   # List all files each item will touch — if any overlap, they're sequential
+   ```
+
+2. **Import-level dependencies:** If Item A creates/modifies a module that Item B imports, they must be sequential. Check:
+   ```bash
+   # Grep for imports/requires of files touched by other items
+   grep -r "import.*from.*[file]" . 2>/dev/null
+   grep -r "require.*[file]" . 2>/dev/null
+   ```
+
+3. **Shared state detection:** If items modify shared configuration (package.json, pyproject.toml, Cargo.toml, settings files), they must be sequential or one must go last.
+
+4. **Schema/type dependencies:** If Item A modifies a type/interface/schema that Item B uses, sequential.
+
+5. **Index file conflicts:** If multiple items add exports to the same index file (index.ts, __init__.py, mod.rs), the last one wins — make these sequential or handle in consolidation.
+
+**Dependency graph output:**
+```
+Item 1 ──→ Item 3 (Item 3 depends on Item 1)
+Item 2 ──→ Item 4 (Item 4 depends on Item 2)
+Item 5 (independent)
+
+Execution plan:
+  Layer 1 (parallel): Items 1, 2, 5
+  Layer 2 (parallel): Items 3, 4
+```
+
+Announce: "Decomposed into [N] parallel items and [M] sequential items across [L] execution layers."
 
 ---
 

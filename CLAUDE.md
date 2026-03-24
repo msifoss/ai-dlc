@@ -9,7 +9,7 @@
 
 ## What This Project Is
 
-AI-DLC is the definitive framework for producing production-grade, AI-assisted software. It provides seven sequential phases, four cross-cutting pillars, governance models for different team sizes, 14 foundational document templates, and a complete skills ecosystem of 28 Claude Code commands and skills.
+AI-DLC is the definitive framework for producing production-grade, AI-assisted software. It provides seven sequential phases, four cross-cutting pillars, governance models for different team sizes, 14 foundational document templates, and a complete skills ecosystem of 30 Claude Code commands and skills.
 
 This is a **documentation + skills repository** — no application code, no runtime dependencies. The deliverables are markdown files that other projects consume as guidance, templates, and executable AI-assisted workflows.
 
@@ -31,15 +31,16 @@ ai-dlc/
 │   ├── reviews/                 # Five-persona review archives
 │   ├── security/                # Security audit reports
 │   └── story/                   # Project narrative history
-├── templates/                   # 14 foundational document templates
+├── templates/                   # 15 foundational document templates (includes MISSION-BRIEF.md)
 ├── skills/
 │   ├── README.md                # Skills ecosystem overview + install guide
-│   ├── commands/                # 16 slash commands (bolt-lfg, brainstorm, setup, etc.)
+│   ├── commands/                # 25 slash commands (dlc-loop, bolt-lfg, brainstorm, route, compose, etc.)
 │   └── skills/                  # 12 full skills (dlc-audit, staff-panel, motherhen, etc.)
 ├── .github/workflows/           # CI pipeline (lint, links, secrets)
 └── scripts/
     ├── init.sh                  # Bootstrap script for new projects
-    └── install-skills.sh        # Install skills into ~/.claude/
+    ├── install-skills.sh        # Install skills into ~/.claude/
+    └── dlc-loop.sh              # Multi-session autonomous DLC loop orchestrator
 ```
 
 ## Conventions
@@ -90,6 +91,13 @@ Each phase guide follows this structure:
 - **Conformance Score** — Percentage (0-100%) measuring how well a child artifact addresses its parent
 - **Risk Tier** — Three-level classification (Critical, Significant, Normal) that overrides trust level for gate ceremony
 - **Olympian** — A specialized AI agent configured for a specific type of work (Builder, Reviewer, Scout, Scribe)
+- **Mission Brief** — Document that front-loads all human judgment before autonomous loop execution, replacing interactive decision gates
+- **DLC Loop** — Full-lifecycle autonomous execution from Phase 0 through Phase 6, driven by Mission Brief and checkpoint validation
+- **Checkpoint** — JSON evidence file written after each phase completion, containing measurable proof (test counts, coverage, findings)
+- **Decision Record** — Greppable one-liner produced by panel skills: `DECISION: X | VOTE: N-M | CONFIDENCE: avg | DISSENT: panelist: concern`
+- **Smart Handoff** — Pattern where `/bolt-lfg` detects parallelizable work and delegates to `/slfg` for concurrent execution
+- **Skill Router** — `/route` command that matches user intent to the right skill from the catalog
+- **Pipeline Composer** — `/compose` command that recommends optimal skill sequences for a given task
 
 ## Quality Standards
 
