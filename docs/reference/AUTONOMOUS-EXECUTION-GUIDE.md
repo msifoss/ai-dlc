@@ -345,6 +345,124 @@ Start with Manual mode when adopting AI-DLC. As trust builds and context files m
 
 ---
 
+## Full-Lifecycle Autonomous Loop
+
+For projects that have earned Trust Level 3 or where a human has front-loaded all judgment into a Mission Brief, the DLC can execute the entire lifecycle (Phase 0–6) autonomously.
+
+### Architecture
+
+The autonomous loop uses a **state machine pattern** with the loop controller external to the AI:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Loop Controller (shell script or /dlc-loop command)          │
+│                                                               │
+│  1. Human fills out Mission Brief (all judgment front-loaded) │
+│  2. Loop reads .dlc-state/current.json                        │
+│  3. AI executes current phase (reads Mission Brief for gates) │
+│  4. AI writes checkpoint with evidence                        │
+│  5. Controller validates checkpoint against thresholds        │
+│  6. If valid → advance to next phase                          │
+│  7. If invalid → retry (up to max_retries) or HALT            │
+│  8. Repeat until Phase 6 complete                             │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### The Mission Brief
+
+The Mission Brief (`templates/MISSION-BRIEF.md`) front-loads all human judgment before the loop starts. It replaces the 28 human decision gates across 7 phases by pre-answering every question the AI would normally ask:
+
+| Gate Type | How the Mission Brief Replaces It |
+|-----------|-----------------------------------|
+| Requirements approval | Goals + acceptance criteria section |
+| Architecture sign-off | Pre-approved decisions table |
+| Scope change approval | Non-goals section defines boundaries |
+| Security acceptance | Risk boundaries table with halt conditions |
+| Deploy approval | Queued for post-loop human review (never automated) |
+
+### Gate Replacement Model
+
+The 28 human decision gates across 7 phases break down into three types, each handled differently:
+
+| Type | % of Gates | Autonomous Replacement |
+|------|-----------|----------------------|
+| **Verification** | 65% | Automated checks: test pass rate, coverage thresholds, finding counts |
+| **Judgment** | 25% | Front-loaded in Mission Brief: architecture decisions, requirements, priorities |
+| **Political** | 10% | Post-hoc review or skipped for Solo+AI governance |
+
+### Permission Configuration
+
+Claude Code's permission prompts are the primary obstacle to uninterrupted execution. Configure `.claude/settings.local.json` with a comprehensive allowlist:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Read", "Write", "Edit", "Glob", "Grep",
+      "Skill(*)", "Agent(*)", "WebSearch",
+      "Bash(git add:*)", "Bash(git commit:*)",
+      "Bash(git checkout:*)", "Bash(git branch:*)",
+      "Bash(npm:*)", "Bash(node:*)", "Bash(python:*)",
+      "Bash(mkdir:*)", "Bash(ls:*)", "Bash(find:*)",
+      "Bash(jq:*)", "Bash(bash scripts/*)"
+    ]
+  }
+}
+```
+
+**Principle:** Allowlist everything local and reversible. Gate everything external and irreversible. Local file operations are always recoverable via `git checkout`. Git push, deploy, and external API calls are not.
+
+### State Management
+
+The loop tracks progress in `.dlc-state/`:
+
+| File | Purpose |
+|------|---------|
+| `current.json` | Current phase, status, session ID |
+| `phase-N-complete.json` | Evidence checkpoint per completed phase |
+| `progress.log` | Human-readable timeline |
+| `error.json` | Last error with recovery instructions |
+| `completion-report.md` | Final summary with evidence and next steps |
+| `deploy-queue.json` | Operations queued for human execution |
+
+Each checkpoint contains measurable evidence:
+
+```json
+{
+  "phase": 3,
+  "status": "complete",
+  "evidence": {
+    "tests_passed": 142,
+    "coverage": 87.3,
+    "critical_findings": 0,
+    "high_findings": 0,
+    "deliverables": ["src/api/handler.py", "tests/test_handler.py"]
+  }
+}
+```
+
+### Two Execution Modes
+
+| Mode | Command | Best For |
+|------|---------|----------|
+| **In-session** | `/dlc-loop` | Small-medium projects within one context window |
+| **Multi-session** | `bash scripts/dlc-loop.sh` | Large projects; survives context limits and crashes |
+
+The shell script invokes `claude -p --continue` per phase, preserving conversation context across invocations while avoiding context window exhaustion.
+
+### Safety Mechanisms
+
+Autonomous execution does NOT mean unsupervised. Safety is enforced through:
+
+1. **Checkpoint validation** — each phase must write evidence that meets configured thresholds
+2. **Halt conditions** — defined in the Mission Brief's risk boundaries table
+3. **Never-automate list** — operations like git push and deploy are queued, never executed
+4. **Max retries** — 3 attempts per phase before halting (configurable)
+5. **State persistence** — if the loop crashes, it resumes from the last checkpoint
+6. **Post-loop review** — human reviews all changes before pushing
+
+---
+
 ## Cross-References
 
 - [Phase 2: Elaboration](../framework/PHASE-2-ELABORATION.md) — Five Questions Pattern and artifact hierarchy
@@ -352,5 +470,8 @@ Start with Manual mode when adopting AI-DLC. As trust builds and context files m
 - [Phase 6: Evolution](../framework/PHASE-6-EVOLUTION.md) — Learning system, context maintenance, pattern extraction
 - [Solo + AI Governance](../governance/SOLO-AI.md) — Trust-adaptive gates in solo workflow
 - [Enterprise Governance](../governance/ENTERPRISE.md) — Trust-adaptive ceremony in enterprise context
+- [Mission Brief Template](../../templates/MISSION-BRIEF.md) — Front-load human judgment for autonomous execution
+- [DLC Loop Command](../../skills/commands/dlc-loop.md) — In-session autonomous loop skill
+- [DLC Loop Script](../../scripts/dlc-loop.sh) — Multi-session shell orchestrator
 - [Glossary](GLOSSARY.md) — Definitions of key terms
 - [Audit Scoring](AUDIT-SCORING.md) — Assessment dimensions referencing autonomous execution

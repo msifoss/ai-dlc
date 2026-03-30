@@ -547,7 +547,7 @@ After any mode, suggest relevant skills based on findings:
 | Config issues found | `/security-audit` to check for exposed secrets |
 | Large content changes | `/changelog` to document what changed |
 | New collaborator joining | `/webteam onboard` then `/motherhen` for project health |
-| Architectural questions | `/staff-panel` for team discussion |
+| Architectural questions | `/staff` for team discussion |
 | Open PRs need review | Review PRs before deploying — `gh pr view <number>` |
 | Approved PRs not merged | Merge approved PRs before deploying — `gh pr merge <number>` |
 | Stale branches (>7 days unmerged) | Check with author or clean up — `git push origin --delete <branch>` |

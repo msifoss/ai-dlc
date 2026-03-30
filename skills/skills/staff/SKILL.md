@@ -1,4 +1,4 @@
-# /staff-panel — Staff Engineer Panel Analysis
+# /staff — Staff Engineer Panel Analysis
 
 Convene a panel of 4 staff engineers from top tech companies + Will Larson as moderator to independently analyze a technical problem, debate options, and produce a consensus decision with implementation plan.
 
@@ -6,7 +6,7 @@ Convene a panel of 4 staff engineers from top tech companies + Will Larson as mo
 
 ## Trigger
 
-User invokes `/staff-panel <problem>` with a description of the technical problem to analyze.
+User invokes `/staff <problem>` with a description of the technical problem to analyze.
 
 ## Arguments
 
@@ -15,10 +15,10 @@ User invokes `/staff-panel <problem>` with a description of the technical proble
 | `<problem>` | A technical problem, architectural question, or investigation finding to analyze. Can be a sentence, a file path, or a reference to a prior finding. |
 
 Examples:
-- `/staff-panel "Should we extract shared code into a Lambda Layer?"`
-- `/staff-panel "Our enrichment pipeline has been silently disabled since v1.5.3"`
-- `/staff-panel lambdas/analytics_ingestion/analytics_handler.py — the db_exec whitelist is getting complex`
-- `/staff-panel F7 from the five-persona review`
+- `/staff "Should we extract shared code into a Lambda Layer?"`
+- `/staff "Our enrichment pipeline has been silently disabled since v1.5.3"`
+- `/staff lambdas/analytics_ingestion/analytics_handler.py — the db_exec whitelist is getting complex`
+- `/staff F7 from the five-persona review`
 
 ---
 

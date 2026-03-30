@@ -58,7 +58,7 @@ Select skills and order them based on the task classification. Apply these compo
 
 **Selection rules:**
 - Include `/brainstorm` if requirements are vague or multiple approaches exist
-- Include `/staff-panel` if architectural decisions are needed
+- Include `/staff` if architectural decisions are needed
 - Include `/exec-review` if strategic/business decisions are needed
 - Include `/deepen-plan` if the task is complex (M/L/XL effort)
 - Include `/security-audit` if the task touches auth, data, or external APIs
@@ -68,7 +68,7 @@ Select skills and order them based on the task classification. Apply these compo
 **Parallelization rules:**
 - Skills that don't depend on each other can note `parallel: true`
 - Review skills can run in parallel (security + five-persona)
-- Analysis panels can run in parallel (staff-panel + exec-review if both needed)
+- Analysis panels can run in parallel (staff + exec-review if both needed)
 
 ### Step 4: Present the Pipeline
 
@@ -122,7 +122,7 @@ Single command — bolt-lfg handles the full pipeline internally.
 ### Architectural Decision (M)
 ```
 1. /brainstorm [decision context]
-2. /staff-panel [specific question]
+2. /staff [specific question]
 3. /pm plan (incorporating panel decision)
 4. (implementation)
 5. /five-persona-review
@@ -134,7 +134,7 @@ Single command — bolt-lfg handles the full pipeline internally.
 ```
 1. /brainstorm [initiative]
 2. /exec-review [strategic question]
-3. /staff-panel [technical approach]
+3. /staff [technical approach]
 4. /pm plan
 5. /deepen-plan
 6. /slfg [parallel implementation]

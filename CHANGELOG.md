@@ -5,7 +5,7 @@ All notable changes to the AI-DLC framework are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2026-03-30
 
 ### Added
 - Chapter 1 narrative history (`docs/story/chapter1.md`)
@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SLO/SLI guidance section in Phase 5 Operations
 - Security Scanning stage in CI/CD deployment proposal template
 - Captain's log for March 6 hardening session
+- 4 Swarms-inspired enhancements: `/route` skill router, `/compose` pipeline composer, voting protocol, smart handoff
+- `/dlc-loop` command for full-lifecycle autonomous execution (Phase 0–6)
+- `MISSION-BRIEF.md` template for front-loading human judgment before autonomous loops
+- `scripts/dlc-loop.sh` multi-session autonomous DLC loop orchestrator
+- Autonomous execution guide updated with DLC Loop tenets and checkpoint validation
 
 ### Changed
 - Five-persona security guidance review: 19 findings, 14 fixed, 4 deferred, 1 accepted
@@ -28,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI pipeline: actions pinned to SHA commits, gitleaks replaced with free CLI
 - Phase 3 Construction: consolidated multi-agent/Ascent/trust-adaptive sections into summary with forward references (792→736 lines)
 - CLAUDE.md repo structure and reference count updated
+- Renamed `/staff-panel` to `/staff` across all commands, skills, and cross-references
+- Updated skill/command counts: 25 commands + 12 skills = 37 total (was 30)
+- Updated template count: 15 (was 14)
 
 ## [1.1.0] - 2026-02-17
 

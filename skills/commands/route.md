@@ -79,7 +79,7 @@ If the user picks one, invoke it immediately with $ARGUMENTS.
 | "fast", "parallel", "swarm" | `/slfg` |
 | "deploy", "release", "ship" | `/bolt-lfg` (close phase), `/changelog` |
 | "security", "vulnerabilities" | `/security-audit`, `/five-persona-review` |
-| "architecture", "design" | `/arch-audit`, `/staff-panel`, `/brainstorm` |
+| "architecture", "design" | `/arch-audit`, `/staff`, `/brainstorm` |
 | "strategy", "business", "executive" | `/exec-review` |
 | "health", "status", "drift" | `/motherhen`, `/prodstatus` |
 | "document", "readme", "docs" | `/docs`, `/readme`, `/changelog` |
@@ -100,7 +100,7 @@ If the user picks one, invoke it immediately with $ARGUMENTS.
 - **No match:** "I couldn't find a matching command. Here's the full catalog:" → list all commands with one-line descriptions.
 - **Ambiguous:** Present top 3 and ask for clarification.
 - **Too broad:** "That could be several things. Are you looking to [option A] or [option B]?"
-- **Already specific:** If user says `/staff-panel` verbatim, just run it — don't route.
+- **Already specific:** If user says `/staff` verbatim, just run it — don't route.
 
 ---
 

@@ -116,7 +116,7 @@ project:
   stack: [detected stack details]
 
 review:
-  # Focus areas for /five-persona-review and /staff-panel
+  # Focus areas for /five-persona-review and /staff
   focus_areas:
     - security
     - architecture
@@ -159,6 +159,27 @@ brainstorms:
   path: docs/brainstorms
   # How many days before a brainstorm is considered stale
   freshness_days: 14
+
+# Autonomous execution settings (for /dlc-loop)
+autonomous:
+  # Mission brief location
+  mission_brief: MISSION-BRIEF.md
+  # Phases to skip (comma-separated, e.g., 0,5 to skip Foundation and Operations)
+  skip_phases: []
+  # Max retries per phase before halting
+  max_retries: 3
+  # Automated gate thresholds (replace human verification gates)
+  gates:
+    min_test_coverage: 80
+    max_critical_findings: 0
+    max_high_findings: 0
+    min_ops_readiness_score: 85
+  # Operations that are NEVER autonomous (always queued for human)
+  never_automate:
+    - git push
+    - deploy to production
+    - create/close GitHub issues
+    - send notifications
 ```
 
 ---
@@ -180,6 +201,6 @@ This config file is read by:
 - `/motherhen` — uses `health.*` thresholds instead of defaults
 - `/dlc-audit` — uses `testing.*` configuration
 - `/five-persona-review` — uses `review.*` settings
-- `/staff-panel` — reads `review.extra_context` for project context
+- `/staff` — reads `review.extra_context` for project context
 - `/bolt-lfg` — uses `brainstorms.*` and `solutions.*` paths
 - `/pm plan` — uses `brainstorms.freshness_days` for document discovery

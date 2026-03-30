@@ -54,7 +54,7 @@ You have 33 tools installed. You need 3:
 |------|---------|
 | Explore an idea before building | /brainstorm "idea" |
 | Check project health | /motherhen |
-| Get strategic advice | /staff-panel "question" |
+| Get strategic advice | /staff "question" |
 | Executive-level analysis | /exec-review "question" |
 | Configure per-project settings | /setup |
 | Manage sprint/backlog | /pm status |

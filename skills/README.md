@@ -49,7 +49,7 @@ skills/
 │   └── ...
 └── skills/            # 12 full skills (multi-phase, rich personas)
     ├── dlc-audit/         # 9-dimension compliance audit
-    ├── staff-panel/       # Staff engineer panel analysis
+    ├── staff/       # Staff engineer panel analysis
     ├── exec-review/       # Executive review panel
     ├── motherhen/         # Project health monitor
     └── ...
@@ -104,7 +104,7 @@ bash scripts/dlc-loop.sh                # Multi-session (survives context limits
 | `/init-project` | Full AI-DLC project scaffold | ~675 |
 | `/readme` | Auto-generated README.md | ~20 |
 | `/security-audit` | 9-category OWASP security audit | ~180 |
-| `/staff-panel` | Staff engineer panel (stub → skill) | ~22 |
+| `/staff` | Staff engineer panel (stub → skill) | ~22 |
 | `/deepen-plan` | 10 parallel research agents to stress-test plans | ~280 |
 | `/slfg` | Swarm mode parallel bolt pipeline | ~210 |
 | `/create-skill` | Meta-tool: scaffold new skills and commands | ~200 |
@@ -119,7 +119,7 @@ bash scripts/dlc-loop.sh                # Multi-session (survives context limits
 | Skill | Purpose | Lines |
 |-------|---------|-------|
 | `/dlc-audit` | 9-dimension AI-DLC compliance scoring (0-10, A-F) | 716 |
-| `/staff-panel` | 4 staff engineers + Will Larson moderator | 313 |
+| `/staff` | 4 staff engineers + Will Larson moderator | 313 |
 | `/exec-review` | 5 executives + Jim Collins, Good-to-Great frameworks | ~440 |
 | `/motherhen` | Adaptive project health monitor (7 checks) | 459 |
 | `/llm-team` | AI search visibility panel (5 GEO/AIO experts) | ~420 |
@@ -145,7 +145,7 @@ Each step in `/bolt-lfg` has a GATE that must pass before proceeding. Prevents "
 - **Result:** Each solved problem compounds — the second occurrence takes minutes, not hours
 
 ### Panel-Based Architecture
-Skills like `/staff-panel`, `/exec-review`, `/llm-team`, and `/marketing-team` use independent expert personas that analyze separately, then synthesize consensus through adversarial debate.
+Skills like `/staff`, `/exec-review`, `/llm-team`, and `/marketing-team` use independent expert personas that analyze separately, then synthesize consensus through adversarial debate.
 
 ### Per-Project Configuration
 `/setup` creates `.ai-dlc.local.yaml` with project-specific settings (review focus areas, test commands, health thresholds). Skills read this file to adapt behavior per project.
@@ -157,7 +157,7 @@ Skills like `/staff-panel`, `/exec-review`, `/llm-team`, and `/marketing-team` u
 `/slfg` decomposes work into independent items and executes them in parallel via background agents. Falls back to sequential `/bolt-lfg` when dependencies prevent parallelization. Same quality gates, faster throughput.
 
 ### Decision Record Protocol
-All panel-based skills (`/staff-panel`, `/exec-review`, and future panels) produce a greppable Decision Record line:
+All panel-based skills (`/staff`, `/exec-review`, and future panels) produce a greppable Decision Record line:
 ```
 DECISION: [choice] | VOTE: [N]-[M] | CONFIDENCE: [weighted avg] | DISSENT: [panelist: concern] or NONE
 ```

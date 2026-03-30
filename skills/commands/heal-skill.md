@@ -206,7 +206,7 @@ ls skills/skills/*/SKILL.md
 |-------|------|--------|--------|-------|--------|
 | /brainstorm | command | 12 | 0 | 0 | ✓ Healthy |
 | /bolt-lfg | command | 12 | 1 | 1 | ✓ Healed |
-| /staff-panel | skill | 15 | 2 | 2 | ✓ Healed |
+| /staff | skill | 15 | 2 | 2 | ✓ Healed |
 | /ticky | skill | 15 | 0 | 0 | ✓ Healthy |
 
 **Total: [N] skills scanned, [N] issues found, [N] fixed.**

@@ -31,3 +31,6 @@ build/
 
 # Logs
 *.log
+
+# DLC Loop runtime state (per-project, not committed)
+.dlc-state/
