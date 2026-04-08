@@ -4,12 +4,12 @@
 
 - **Name:** AI-DLC (AI Development Life Cycle)
 - **Type:** Documentation framework / methodology standard
-- **Version:** 1.1.0
+- **Version:** 1.3.0
 - **License:** MIT
 
 ## What This Project Is
 
-AI-DLC is the definitive framework for producing production-grade, AI-assisted software. It provides seven sequential phases, four cross-cutting pillars, governance models for different team sizes, 15 foundational document templates, and a complete skills ecosystem of 37 Claude Code commands and skills (25 commands + 12 skills).
+AI-DLC is the definitive framework for producing production-grade, AI-assisted software. It provides seven sequential phases, four cross-cutting pillars, governance models for different team sizes, 16 foundational document templates, and a complete skills ecosystem of 37 Claude Code commands and skills (25 commands + 12 skills).
 
 This is a **documentation + skills repository** — no application code, no runtime dependencies. The deliverables are markdown files that other projects consume as guidance, templates, and executable AI-assisted workflows.
 
@@ -78,7 +78,7 @@ Each phase guide follows this structure:
 
 ## Key Terminology
 
-- **Bolt** — A focused unit of work (typically 1-4 hours) with planning, execution, review, and retro
+- **Bolt** — A focused unit of work (typically 1-4 hours) with planning, execution, review, and retro. Classified by work type (Feature/Enhancement/Bug Fix/Hotfix/Refactoring) which determines pipeline depth
 - **Captain's Log** — Decision record written during/after each bolt
 - **Context File** — CLAUDE.md or equivalent that provides AI with persistent project knowledge
 - **Five Questions Pattern** — AI surfaces assumptions before implementation; human validates
@@ -98,6 +98,12 @@ Each phase guide follows this structure:
 - **Smart Handoff** — Pattern where `/bolt-lfg` detects parallelizable work and delegates to `/slfg` for concurrent execution
 - **Skill Router** — `/route` command that matches user intent to the right skill from the catalog
 - **Pipeline Composer** — `/compose` command that recommends optimal skill sequences for a given task
+- **Work-Type Classification** — Step 0 of `/bolt-lfg` that routes work through appropriate pipeline depth (Feature → full, Bug Fix → minimal, Hotfix → emergency)
+- **Fix-Retest Loop** — Reviewer-owns-verdict pattern: the reviewer who found issues must re-verify the fix. Max 2 cycles before human escalation. Prevents self-certification.
+- **Artifact Gate** — Pipeline transition that verifies artifact existence (not just command completion). State derived from what exists, not what's claimed.
+- **Decisions-Needed Protocol** — Structured escalation with CRITICAL (blocks pipeline) and STANDARD (proceed with defaults) severity levels
+- **Impact Scan** — Pre-implementation analysis that greps consumers of files being changed, rates blast radius LOW/MEDIUM/HIGH
+- **Condensed Context Block** — `PROJECT-CONTEXT.md` generated during planning that carries stack, patterns, and completed bolts forward to avoid re-reading everything on subsequent bolts
 
 ## Quality Standards
 
@@ -113,8 +119,8 @@ Each phase guide follows this structure:
 - **Quarterly:** Full `/dlc-audit` + `/five-persona-review` on dimensions scoring below 7/10
 - **CLAUDE.md accuracy audit:** Quarterly — verify repo structure, terminology, and conventions still match reality
 - **Drift detection:** Check for stale dates, expired examples, and outdated references in code samples
-- **Last review:** 2026-03-06 (five-persona code review, 52 findings, 7 High fixed; 9-category security audit, 5 findings, all fixed)
-- **Next review due:** 2026-06-03 (Q2)
+- **Last review:** 2026-04-08 (AIDLC competitive analysis: Staff Panel + Five-Persona Review, 47 findings; gap analysis yielding 9 improvements implemented)
+- **Next review due:** 2026-07-08 (Q3)
 
 ## Contributing
 

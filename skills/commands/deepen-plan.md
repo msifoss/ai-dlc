@@ -10,7 +10,7 @@ Usage: `/deepen-plan [plan file or topic]`
 
 Before work begins, launch 10 domain-specialized research agents to stress-test and enrich a plan. Each agent covers a distinct research domain — not generic breadth, but targeted depth across the full risk surface.
 
-> Plans fail because of what you don't know. This command sends 10 specialized agents — each covering a distinct risk domain (learnings, codebase, best practices, compliance, security, dependencies, tests, performance, operations, cost). Domain-specialized agents with extended thinking produce deeper research than many generic agents doing broad searches. Quantity of domains x depth per domain = comprehensive coverage.
+> Plans fail because of what you don't know. This command sends 11 specialized agents — each covering a distinct risk domain (learnings, codebase, best practices, compliance, security, dependencies, tests, performance, operations, cost, **impact**). Domain-specialized agents with extended thinking produce deeper research than many generic agents doing broad searches. Quantity of domains x depth per domain = comprehensive coverage.
 
 ---
 
@@ -28,9 +28,9 @@ GATE: STOP. A plan or brainstorm must exist. If nothing found, suggest: "Run `/b
 
 ---
 
-### Step 1: Launch 10 Parallel Research Agents
+### Step 1: Launch 11 Parallel Research Agents
 
-Use the Agent tool to launch agents in batches of 3-4 per message (Claude Code limit). Each agent works independently — do NOT let one agent's results influence another. Launch all 10 as fast as possible using `run_in_background: true` for maximum parallelism.
+Use the Agent tool to launch agents in batches of 3-4 per message (Claude Code limit). Each agent works independently — do NOT let one agent's results influence another. Launch all 11 as fast as possible using `run_in_background: true` for maximum parallelism.
 
 #### Batch 1 (launch simultaneously)
 
@@ -169,7 +169,47 @@ Analyze the cost implications of this plan:
 Return: cost projection, optimization recommendations, budget impact.
 ```
 
-GATE: STOP. Wait for ALL 10 agents to complete before proceeding.
+#### Batch 4 (launch simultaneously)
+
+#### Agent 11: Impact Scan Researcher
+```
+Analyze the codebase impact of the planned changes (inspired by AIDLC Tech Lead impact scan):
+
+For each file or module the plan will modify:
+1. Grep for all importers/consumers of that file
+2. Identify shared types, interfaces, or contracts that may change
+3. Check for downstream dependencies that could break
+4. Look for test files that exercise the modified code
+
+Produce a structured impact assessment:
+
+## Impact Assessment
+
+### Files to Modify
+| File | Consumers | Risk |
+|------|-----------|------|
+| [path] | [N importers listed] | LOW/MEDIUM/HIGH |
+
+### Shared Contract Changes
+[List any types, interfaces, or API contracts that change and who consumes them]
+
+### Blast Radius
+- Direct impact: [N files modified]
+- Indirect impact: [N consumer files that may need updates]
+- Test coverage: [N existing tests cover modified code]
+
+### Risk Rating: [LOW | MEDIUM | HIGH]
+- LOW: Changes are leaf-node, no shared contracts affected
+- MEDIUM: Shared code changes but consumers are well-tested
+- HIGH: Breaking changes to shared contracts with undertested consumers
+
+### Precautions
+[Specific warnings for the implementation phase]
+
+Return: impact assessment with file-level detail, risk rating, and precautions.
+```
+
+GATE: STOP. Wait for ALL 11 agents to complete before proceeding.
 
 ---
 
@@ -245,8 +285,9 @@ Display a summary:
 
 **Amendments applied:** [N] must-address changes
 **Backlog items created:** [N] should-address items deferred
-**Research agents:** 10/10 completed
+**Research agents:** 11/11 completed
 **Learnings referenced:** [N] past solutions, [N] captain's logs
+**Impact risk rating:** [LOW/MEDIUM/HIGH] — [N] files modified, [N] consumers affected
 **Security risks identified:** [N] (all addressed in plan)
 **Performance concerns:** [N] (mitigations added)
 **Cost projection:** [estimated monthly delta]

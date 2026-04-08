@@ -40,7 +40,35 @@ ls .ai-dlc.local.yaml 2>/dev/null
 
 If `.ai-dlc.local.yaml` exists, read it for project-specific context that should inform the panel (infrastructure constraints, team topology, deployment model, etc.).
 
-### 0c. Deep Problem Understanding
+### 0c. Classify Work Type Context
+
+Identify the work type to frame the panel's analysis appropriately:
+
+| Work Type | Panel Focus |
+|-----------|-------------|
+| **Feature** | Architecture, approach selection, risk-reward trade-offs |
+| **Enhancement** | Impact on existing system, backward compatibility, scope control |
+| **Bug Fix** | Root cause analysis, fix vs workaround, regression prevention |
+| **Refactoring** | Blast radius, migration strategy, behavioral preservation |
+| **Architectural** | Long-term implications, team scaling, cost at scale |
+
+Include the work type in the Problem Statement so panelists calibrate their analysis depth.
+
+### 0d. Impact Assessment (for code-related problems)
+
+If the problem references specific code files, perform a lightweight impact scan BEFORE the panel convenes:
+
+1. **Grep for consumers** — for each file mentioned, find all importers/callers
+   ```bash
+   grep -rn "import.*[filename]" src/ --include="*.{ts,js,py,go,rs}" 2>/dev/null | head -20
+   ```
+2. **Identify shared contracts** — types, interfaces, or APIs that multiple modules depend on
+3. **Count the blast radius** — how many files are directly and indirectly affected?
+4. **Check test coverage** — are the affected files well-tested?
+
+Produce a brief **Impact Summary** (5-10 lines) to include in the panel briefing. This gives panelists concrete data instead of abstract risk discussion.
+
+### 0e. Deep Problem Understanding
 
 Before convening the panel, deeply understand the problem:
 
@@ -56,6 +84,8 @@ Produce a **Problem Statement** with:
 - Why it matters (impact table with metrics)
 - Root cause chain (A → B → C → D)
 - Constraints that limit the solution space
+- **Work type:** [Feature/Enhancement/Bug Fix/Refactoring/Architectural]
+- **Impact summary:** [blast radius, consumer count, test coverage]
 
 ---
 

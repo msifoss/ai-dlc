@@ -14,17 +14,38 @@ Full autonomous engineering pipeline that chains the AI-DLC bolt workflow end-to
 
 ---
 
-## Pipeline
+## Step 0: Classify Work Type
 
-```
-brainstorm → plan → work → review → captainslog → close
-```
+**FIRST — before anything else.** Classify $ARGUMENTS to determine pipeline depth:
 
-CRITICAL: Execute every step below IN ORDER. Do NOT skip any step. Do NOT jump ahead to coding. The brainstorm and planning phases MUST complete before work begins.
+| Trigger Pattern | Work Type | Pipeline |
+|-----------------|-----------|----------|
+| "Build X" / "Add X" / "Create X" / new capability | **Feature** | Full (all steps) |
+| "Improve X" / "Enhance X" / "Add Y to existing X" | **Enhancement** | Abbreviated (skip brainstorm, delta plan) |
+| "Fix X" / "X is broken" / "bug in X" | **Bug Fix** | Minimal (skip brainstorm + deepen, work → review → log → close) |
+| "X is down" / "Urgent" / "production broken" | **Hotfix** | Emergency (work → commit, skip review) |
+| "Refactor X" / "Clean up X" / "Extract X" | **Refactoring** | Engineering (plan → work → full review → log → close) |
+
+**Classification rules:**
+1. If $ARGUMENTS explicitly names a work type (e.g., "fix this bug"), use it
+2. If ambiguous, default to **Enhancement** (not Feature — avoid over-ceremony)
+3. If the user previously ran `/brainstorm`, default to **Feature** (they already invested in exploration)
+
+Announce: `"Classified as [Work Type] — using [pipeline name] pipeline."`
+
+**Route to the appropriate pipeline section below.**
 
 ---
 
-## Step 1: Brainstorm (if needed)
+## Feature Pipeline (Full)
+
+```
+brainstorm → plan → deepen → work → review (with fix-retest) → captainslog → close
+```
+
+CRITICAL: Execute every step IN ORDER. Do NOT skip steps. Do NOT jump to coding.
+
+### Step 1: Brainstorm (if needed)
 
 **Gate:** Determine if brainstorming is needed before planning.
 
@@ -34,7 +55,7 @@ Check if $ARGUMENTS describes a clear, well-scoped task:
 - Specific acceptance criteria provided
 - Referenced existing patterns to follow
 - Described exact expected behavior
-- Constrained, well-defined scope (e.g., "fix bug X in file Y")
+- Constrained, well-defined scope
 
 **Unclear requirements indicators (brainstorm first):**
 - Vague goal ("improve the auth system")
@@ -47,13 +68,26 @@ Check if $ARGUMENTS describes a clear, well-scoped task:
 /brainstorm $ARGUMENTS
 ```
 
-GATE: STOP. Verify that a brainstorm document exists at `docs/brainstorms/`. If no brainstorm file was created, the brainstorm did not complete — run it again. Do NOT proceed to Step 2 until a brainstorm document exists OR requirements were clear enough to skip.
+ARTIFACT GATE: STOP. Run `ls docs/brainstorms/*.md 2>/dev/null | tail -1`. A brainstorm file MUST exist. If not, the brainstorm did not complete — run it again. Do NOT proceed until a brainstorm artifact exists OR requirements were clear enough to skip.
 
 **If skipping brainstorm:** Announce "Requirements are clear — skipping brainstorm, proceeding to planning." and continue to Step 2.
 
 ---
 
-## Step 2: Plan the Bolt
+### Step 1b: Check Decisions Needed
+
+Before planning, check for unresolved blocking decisions:
+
+```bash
+ls docs/decisions-needed.md 2>/dev/null
+```
+
+If `docs/decisions-needed.md` exists and contains `[CRITICAL]` items:
+1. Read the file and surface CRITICAL items to the user
+2. CRITICAL items BLOCK the pipeline — do NOT proceed until resolved
+3. STANDARD items can proceed with noted defaults
+
+### Step 2: Plan the Bolt
 
 ```
 /pm plan
@@ -63,24 +97,26 @@ During planning:
 - If a brainstorm document exists in `docs/brainstorms/` matching this feature, reference it
 - Pull items from the backlog or create new ones based on $ARGUMENTS
 - Define the bolt goal, items, and success criteria
+- Set work type: Feature
 
-GATE: STOP. Verify that `docs/pm/CURRENT-SPRINT.md` has been updated with a new bolt. If not, planning did not complete — run `/pm plan` again. Do NOT proceed to Step 2b without an active bolt.
+ARTIFACT GATE: STOP. Run `grep -l "IN PROGRESS" docs/pm/CURRENT-SPRINT.md 2>/dev/null`. The file MUST exist AND contain an active bolt. If not, planning did not complete — run `/pm plan` again. Do NOT proceed without an active bolt.
 
 ---
 
-## Step 2b: Deepen the Plan
+### Step 2b: Deepen the Plan
 
 ```
 /deepen-plan
 ```
 
-This launches 4 parallel research agents to stress-test the plan:
-- **Learnings Researcher** — searches docs/solutions/ and docs/captains_log/ for relevant past decisions
-- **Codebase Researcher** — finds existing patterns, reusable code, and potential conflicts
-- **Best Practices Researcher** — identifies pitfalls, security concerns, and performance anti-patterns
-- **Framework Compliance Researcher** — checks AI-DLC phase requirements and governance gates
+This launches parallel research agents to stress-test the plan, including:
+- **Learnings Researcher** — past decisions from docs/solutions/ and docs/captains_log/
+- **Codebase Researcher** — existing patterns, reusable code, potential conflicts
+- **Best Practices Researcher** — pitfalls, security concerns, performance anti-patterns
+- **Framework Compliance Researcher** — AI-DLC phase requirements and governance gates
+- **Impact Scan Researcher** — greps consumers of files being changed, rates blast radius
 
-GATE: STOP. Verify that the plan in CURRENT-SPRINT.md now has a "Research Summary" section with amendments applied. If /deepen-plan found "Must Address" items, they must be integrated before work begins. Do NOT proceed to Step 2c without a research-hardened plan.
+ARTIFACT GATE: STOP. Run `grep -c "Research Summary" docs/pm/CURRENT-SPRINT.md 2>/dev/null`. The plan MUST contain a "Research Summary" section. If /deepen-plan found "Must Address" items, they must be integrated before work begins. Do NOT proceed without a research-hardened plan.
 
 ---
 
@@ -155,30 +191,65 @@ For each completed item, verify:
 
 **Skip when:** Leaf-node changes with no callbacks, no state persistence, no parallel interfaces.
 
-GATE: STOP. Verify that code changes were made (not just planning). Run `git diff --stat` to confirm files were created or modified. Tests must pass. Do NOT proceed to Step 4 if no code changes exist or tests are failing.
+ARTIFACT GATE: STOP. Run `git diff --stat` to confirm files were created or modified. Then run the project's test command. BOTH must pass:
+1. `git diff --stat` shows changed files (not empty)
+2. Tests pass (exit code 0)
+Do NOT proceed to Step 4 if no code changes exist or tests are failing.
 
 ---
 
-## Step 4: Review
+### Step 4: Review
 
 ```
 /five-persona-review
 ```
 
 The review will:
-- Run 5 independent persona analyses
+- Run 12 independent persona analyses
 - Produce a consolidated findings report at `docs/reviews/`
 - Classify findings by severity (Critical/High/Medium/Low)
 
-GATE: STOP. Verify that a review document was created in `docs/reviews/`. If Critical findings exist, fix them before proceeding. High findings should be fixed or explicitly deferred with rationale.
+ARTIFACT GATE: STOP. Run `ls docs/reviews/*$(date +%Y%m%d)* 2>/dev/null | tail -1`. A review document MUST exist from today. If not, the review did not complete — run it again.
 
-### 4b. Fix Findings
+### Step 4b: Fix-Retest Loop (Reviewer Owns Verdict)
 
-If the review found Critical or High issues:
+If the review found Critical or High issues, enter the fix-retest loop:
+
+```
+┌─────────────┐     findings      ┌──────────────┐
+│  Review      │ ───────────────→ │  Fix          │
+│  (owns       │                  │  (implement)  │
+│   verdict)   │  ←────────────── │               │
+│              │   "fixed, ready  └──────────────┘
+│  Re-reviews  │    for retest"          │
+│  ┌─────┐    │                          │
+│  │PASS │────│──→ Proceed to Step 5     │
+│  └─────┘    │                          │
+│  ┌─────┐    │   cycle < 2?             │
+│  │FAIL │────│──→ YES → back to fix ────┘
+│  └─────┘    │   NO  → ESCALATE to user
+└─────────────┘
+```
+
+**Cycle 1:**
 1. Fix all Critical findings immediately
-2. Fix High findings or create backlog items for them
+2. Fix High findings or create backlog items for them with rationale
 3. Re-run affected tests
-4. Commit fixes with references to finding IDs (e.g., "fix: resolve F1 from five-persona review")
+4. Commit fixes referencing finding IDs (e.g., "fix: resolve F1 from five-persona review")
+5. Re-run `/five-persona-review` on the changed files only (scoped review)
+
+**Cycle 2 (if Cycle 1 re-review found new issues):**
+1. Fix remaining issues
+2. Re-run scoped review
+3. If STILL failing after Cycle 2: **ESCALATE TO USER**
+   - Present: original findings, what was fixed, what remains
+   - Ask: "Ship with known issues? Redesign? Defer?"
+
+**Rules:**
+- The **same review process** must re-evaluate fixes — you cannot self-certify
+- Fix teams fix ONLY the reported issues — no scope creep, no "while I'm here" improvements
+- If Cycle 2 finds the SAME issues as Cycle 1, the problem is likely architectural — escalate
+- Critical security findings are a HARD BLOCK — cannot proceed without resolution
 
 ---
 
@@ -194,7 +265,7 @@ The captain's log will:
 - Document decisions made, issues encountered, lessons learned
 - Record next steps
 
-GATE: STOP. Verify that a captain's log was created in `docs/captains_log/`. If not, knowledge capture failed — the most valuable part of compound engineering is lost. Run `/captainslog new` again.
+ARTIFACT GATE: STOP. Run `ls docs/captains_log/*$(date +%Y%m%d)* 2>/dev/null | tail -1`. A captain's log from today MUST exist. If not, knowledge capture failed — run `/captainslog new` again.
 
 ---
 
@@ -291,4 +362,88 @@ tags: [relevant-tags]
 | 6 | `/pm close` + PR | Bolt archived, PR created | `docs/pm/SPRINT-LOG.md` |
 | 7 | (compound, optional) | Solution doc if non-trivial | `docs/solutions/*.md` |
 
-Start with Step 1 now. Remember: brainstorm/plan FIRST, then work. Never skip the gates.
+**If classified as Feature:** Start with Step 1 now. Remember: brainstorm/plan FIRST, then work. Never skip the gates.
+
+---
+
+## Enhancement Pipeline (Abbreviated)
+
+```
+plan (delta) → deepen → work → review (with fix-retest) → captainslog → close
+```
+
+Skip brainstorming — the feature already exists. Planning produces a DELTA spec (only what's changing).
+
+1. **Plan:** Run `/pm plan` — but scope to ONLY the change, not the full feature. Set work type: Enhancement.
+2. **Deepen:** Run `/deepen-plan` — impact scan is especially important (existing consumers may break).
+3. **Work:** Same as Feature Step 3 (3a, 3b, 3c). Engineers READ existing implementation first.
+4. **Review:** Same as Feature Step 4 (with fix-retest loop).
+5. **Log:** Same as Feature Step 5.
+6. **Close:** Same as Feature Step 6.
+
+---
+
+## Bug Fix Pipeline (Minimal)
+
+```
+work → review → captainslog → close
+```
+
+Skip brainstorming AND deepening. The bug report IS the spec.
+
+1. **Work:** Same as Feature Step 3 — but fix ONLY the reported defect. No scope creep.
+   - Branch: `fix/$(date +%Y%m%d)-description`
+   - ARTIFACT GATE: `git diff --stat` shows changes + tests pass.
+2. **Review:** Run `/five-persona-review` scoped to changed files only.
+   - Fix-retest loop applies (max 2 cycles).
+3. **Log:** Run `/captainslog new` — brief, focused on root cause and prevention.
+4. **Close:** Run `/pm close` + push + PR.
+
+---
+
+## Hotfix Pipeline (Emergency)
+
+```
+work → commit
+```
+
+Production is broken. Speed matters.
+
+1. **Work:** Surgical fix on a `hotfix/` branch from main. NO feature work, NO refactoring.
+   - `git checkout -b hotfix/$(date +%Y%m%d)-description main`
+   - Fix ONLY the production issue.
+   - Run tests — if tests pass, proceed.
+2. **Commit + Push:** Commit, push, create PR to main AND dev.
+   - Skip formal review (speed > ceremony for emergencies).
+   - Log the hotfix in captain's log AFTER deployment.
+
+---
+
+## Refactoring Pipeline (Engineering)
+
+```
+plan → work → review (full) → captainslog → close
+```
+
+Improving code without changing behavior. High regression risk.
+
+1. **Plan:** Run `/pm plan` — document what's being refactored and why. Set work type: Refactoring. Impact scan is MANDATORY (refactoring touches shared code).
+2. **Deepen:** Run `/deepen-plan` — focus on codebase impact and test coverage.
+3. **Work:** Same as Feature Step 3. Verify behavior didn't change (existing tests must still pass with no modifications).
+4. **Review:** FULL review (`/five-persona-review`). Refactoring is high-risk for regression. Fix-retest loop applies.
+5. **Log:** Run `/captainslog new`.
+6. **Close:** Run `/pm close` + push + PR.
+
+---
+
+## Pipeline Summary
+
+| Work Type | Steps | When |
+|-----------|-------|------|
+| **Feature** | brainstorm → plan → deepen → work → review → log → close | New capability |
+| **Enhancement** | plan (delta) → deepen → work → review → log → close | Improve existing feature |
+| **Bug Fix** | work → review → log → close | Fix broken thing |
+| **Hotfix** | work → commit | Production emergency |
+| **Refactoring** | plan → deepen → work → review (full) → log → close | Code quality improvement |
+
+Start with Step 0 (Classify) now.

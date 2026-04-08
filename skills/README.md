@@ -59,17 +59,22 @@ skills/
 
 The AI-DLC bolt lifecycle, now with autonomous pipelines at two levels:
 
-**Bolt-level autonomy** (one feature):
+**Bolt-level autonomy** (adaptive pipelines by work type):
 ```
-/brainstorm → /pm plan → /deepen-plan → work → /five-persona-review → /captainslog → /pm close
-     │              │                    │                      │
-     └── docs/brainstorms/  ←──── auto-discovered ────→  docs/solutions/
-                                  (knowledge loop)
+Step 0: Classify → Route to appropriate pipeline
+
+Feature:      /brainstorm → /pm plan → /deepen-plan → work → review (fix-retest) → log → close
+Enhancement:  /pm plan (delta) → /deepen-plan → work → review (fix-retest) → log → close
+Bug Fix:      work → review (fix-retest) → log → close
+Hotfix:       work → commit
+Refactoring:  /pm plan → /deepen-plan → work → review (full, fix-retest) → log → close
 ```
 
 ```bash
-/bolt-lfg "feature description"        # Single bolt
+/bolt-lfg "feature description"        # Auto-classifies and routes
 /slfg "parallel features"              # Parallel bolts
+/pm verify                             # Drift detection
+/pm decisions                          # Manage blocking decisions
 ```
 
 **Full-lifecycle autonomy** (entire project):

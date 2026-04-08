@@ -5,6 +5,35 @@ All notable changes to the AI-DLC framework are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-04-08
+
+### Added
+- **Work-type classification** in `/bolt-lfg`: Routes work through adaptive pipeline depths (Feature/Enhancement/Bug Fix/Hotfix/Refactoring) — biggest single improvement, stops running 7-step ceremony on one-line fixes
+- **Fix-retest loop** in `/bolt-lfg` Step 4: Reviewer-owns-verdict pattern with max 2 cycles before human escalation — prevents self-certification of fixes
+- **Artifact-gated transitions** in `/bolt-lfg`: All gates now verify artifact existence (not just command completion) — derived from AIDLC's bolt-state.sh pattern that prevented 218+ status drifts
+- **5 abbreviated pipelines** in `/bolt-lfg`: Feature (full), Enhancement (abbreviated), Bug Fix (minimal), Hotfix (emergency), Refactoring (engineering) — each with appropriate ceremony depth
+- **`/pm verify` action**: Drift detection comparing claimed sprint status against actual artifacts — auto-corrects when reality diverges from claims
+- **`/pm decisions` action**: Structured decisions-needed protocol with CRITICAL/STANDARD severity, categories, and defaults — CRITICAL items hard-block the pipeline
+- **Work-type tracking** in `/pm plan`: Bolts now carry a Work Type field (Feature/Enhancement/Bug Fix/Hotfix/Refactoring)
+- **Condensed context block** in `/pm plan`: Generates `docs/pm/PROJECT-CONTEXT.md` with stack, patterns, completed bolts — prevents re-reading everything on bolt 2+
+- **Impact Scan Researcher** (Agent 11) in `/deepen-plan`: Greps consumers of files being changed, rates blast radius LOW/MEDIUM/HIGH — catches integration breakage early
+- **Impact assessment** in `/staff` Phase 0: Greps consumers, counts blast radius, checks test coverage before panel convenes — gives panelists concrete data
+- **Work-type context** in `/staff` Phase 0: Frames panel analysis appropriately for features vs bug fixes vs refactoring
+- **`DECISIONS-NEEDED.md` template**: 16th foundational template with CRITICAL/STANDARD escalation protocol, 8 decision categories
+- **AIDLC gap analysis**: Staff Engineer Panel + Five-Persona Review of competing AIDLC framework (`docs/key_findings/20260408-1045-AIDLC-vs-AI-DLC-Gap-Analysis.md`)
+
+### Changed
+- `/bolt-lfg` pipeline restructured: Step 0 (classify) routes to appropriate pipeline depth before any other work
+- `/deepen-plan` upgraded from 10 to 11 research agents (added Impact Scan Researcher)
+- `/pm plan` now loads PROJECT-CONTEXT.md and checks decisions-needed.md during planning
+- `/staff` Phase 0 expanded with impact assessment (0d) and work-type classification (0c) before Deep Problem Understanding (now 0e)
+
+### Sources
+- AIDLC framework analysis: 47 findings (5C, 11H, 18M, 13L), composite 5.6/10
+- Staff Engineer Panel: unanimous 4-0 ADOPT on artifact-gated transitions, DBA-style veto, auto-correcting state
+- Five-Persona Review: Critical findings on bypassPermissions, eval injection, O(n^2) hook overhead
+- 6 patterns adopted, 4 anti-patterns documented to avoid
+
 ## [1.2.0] - 2026-03-30
 
 ### Added
